@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Baby Steps — Admin</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #0d0d12; --surface: #17171f; --border: #2a2a3a;
+      --a: #3b82f6; --b: #f43f5e; --text: #e2e8f0; --muted: #64748b;
+      --success: #22c55e; --danger: #ef4444; --warn: #f59e0b;
+    }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; padding:24px; }
+
+    h1 { font-size:1.3rem; font-weight:800; margin-bottom:4px; }
+    .subtitle { color:var(--muted); font-size:0.85rem; margin-bottom:24px; }
+
+    .status-bar {
+      background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:12px 16px; margin-bottom:24px; display:flex; align-items:center; gap:10px;
+      font-size:0.85rem;
+    }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--danger); }
+    .dot.on { background:var(--success); }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+
+    .player-card {
+      background:var(--surface); border:2px solid var(--border);
+      border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:14px;
+    }
+    .player-card.a { border-color: color-mix(in srgb, var(--a) 40%, var(--border)); }
+    .player-card.b { border-color: color-mix(in srgb, var(--b) 40%, var(--border)); }
+
+    .card-header { display:flex; align-items:center; justify-content:space-between; }
+    .card-title { font-size:1rem; font-weight:700; }
+    .live-val { font-size:1.5rem; font-weight:900; font-variant-numeric:tabular-nums; }
+
+    label { display:block; font-size:0.75rem; color:var(--muted); margin-bottom:5px;
+            text-transform:uppercase; letter-spacing:.05em; }
+
+    input[type=text], input[type=number] {
+      width:100%; background:var(--bg); border:1px solid var(--border);
+      color:var(--text); padding:9px 12px; border-radius:8px; font-size:0.95rem; outline:none;
+    }
+    input:focus { border-color:var(--accent,#3b82f6); }
+
+    .row { display:flex; gap:8px; }
+    .row input { flex:1; }
+
+    button {
+      padding:9px 14px; border-radius:8px; border:none; font-size:0.85rem;
+      font-weight:700; cursor:pointer; transition:opacity .15s;
+      white-space:nowrap;
+    }
+    button:active { opacity:.75; }
+    .btn-set    { background:var(--accent,#3b82f6); color:#fff; }
+    .btn-danger { background:var(--danger); color:#fff; }
+    .btn-warn   { background:var(--warn); color:#000; }
+    .btn-muted  { background:var(--border); color:var(--text); }
+    .btn-success { background:var(--success); color:#fff; }
+
+    /* Falls row */
+    .falls-row { display:flex; align-items:center; gap:10px; }
+    .falls-count { font-size:1.4rem; font-weight:900; color:var(--danger);
+                   font-variant-numeric:tabular-nums; min-width:32px; text-align:center; }
+    .falls-row button { padding:8px 12px; font-size:1rem; }
+
+    /* Global section */
+    .global-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:12px;
+    }
+    .global-card h2 { font-size:0.95rem; font-weight:700; color:var(--muted); }
+    .global-btns { display:flex; gap:10px; flex-wrap:wrap; }
+
+    /* Toast */
+    .toast {
+      position:fixed; bottom:20px; right:20px; background:var(--success);
+      color:#fff; padding:10px 18px; border-radius:8px; font-weight:700;
+      opacity:0; transform:translateY(8px); transition:all .2s; pointer-events:none;
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .toast.err  { background:var(--danger); }
+
+    /* Separator */
+    hr { border:none; border-top:1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<h1>⚙️ Baby Steps — Admin</h1>
+<p class="subtitle">Contrôle total du stream. Toutes les modifications s'appliquent en temps réel sur l'overlay.</p>
+
+<div class="status-bar">
+  <div class="dot" id="dot"></div>
+  <span id="status-txt">Connexion...</span>
+  <span style="margin-left:auto;color:var(--muted)" id="last-update">—</span>
+</div>
+
+<div class="grid">
+
+  <!-- PLAYER A -->
+  <div class="player-card a" style="--accent:var(--a)">
+    <div class="card-header">
+      <div class="card-title" style="color:var(--a)">🔵 Player A</div>
+      <div class="live-val" id="live-a" style="color:var(--a)">—</div>
+    </div>
+
+    <div>
+      <label>Pseudo</label>
+      <div class="row">
+        <input type="text" id="name-a" placeholder="Nom du joueur A" />
+        <button class="btn-set" onclick="setName('playerA')">OK</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <label>Position actuelle (hauteur)</label>
+      <div class="row">
+        <input type="number" id="height-a" placeholder="ex: 342" min="0" />
+        <button class="btn-set" onclick="setHeight('playerA')">SET</button>
+      </div>
+    </div>
+
+    <div>
+      <label>Record (max atteint)</label>
+      <div class="row">
+        <input type="number" id="maxheight-a" placeholder="ex: 570" min="0" />
+        <button class="btn-set" onclick="setMaxHeight('playerA')">SET</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <label>Chutes 💀</label>
+      <div class="falls-row">
+        <button class="btn-muted" onclick="adjFalls('playerA', -1)">−</button>
+        <span class="falls-count" id="falls-a">0</span>
+        <button class="btn-danger" onclick="adjFalls('playerA', +1)">+</button>
+        <button class="btn-muted" onclick="setFalls('playerA', 0)" style="margin-left:auto;font-size:0.8rem">Remettre à 0</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <button class="btn-warn" onclick="resetPlayer('playerA')">↺ Reset Player A</button>
+  </div>
+
+  <!-- PLAYER B -->
+  <div class="player-card b" style="--accent:var(--b)">
+    <div class="card-header">
+      <div class="card-title" style="color:var(--b)">🔴 Player B</div>
+      <div class="live-val" id="live-b" style="color:var(--b)">—</div>
+    </div>
+
+    <div>
+      <label>Pseudo</label>
+      <div class="row">
+        <input type="text" id="name-b" placeholder="Nom du joueur B" />
+        <button class="btn-set" onclick="setName('playerB')">OK</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <label>Position actuelle (hauteur)</label>
+      <div class="row">
+        <input type="number" id="height-b" placeholder="ex: 215" min="0" />
+        <button class="btn-set" onclick="setHeight('playerB')">SET</button>
+      </div>
+    </div>
+
+    <div>
+      <label>Record (max atteint)</label>
+      <div class="row">
+        <input type="number" id="maxheight-b" placeholder="ex: 420" min="0" />
+        <button class="btn-set" onclick="setMaxHeight('playerB')">SET</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <label>Chutes 💀</label>
+      <div class="falls-row">
+        <button class="btn-muted" onclick="adjFalls('playerB', -1)">−</button>
+        <span class="falls-count" id="falls-b">0</span>
+        <button class="btn-danger" onclick="adjFalls('playerB', +1)">+</button>
+        <button class="btn-muted" onclick="setFalls('playerB', 0)" style="margin-left:auto;font-size:0.8rem">Remettre à 0</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <button class="btn-warn" onclick="resetPlayer('playerB')">↺ Reset Player B</button>
+  </div>
+</div>
+
+<!-- GLOBAL -->
+<div class="global-card">
+  <h2>GLOBAL</h2>
+  <div class="global-btns">
+    <button class="btn-danger" onclick="resetAll()">💥 Reset TOUT (nouveau run)</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const socket = io(window.location.origin);
+  let state = {};
+
+  socket.on('connect',    () => setOnline(true));
+  socket.on('disconnect', () => setOnline(false));
+
+  socket.on('state_sync', (s) => {
+    state = s;
+    renderState(s);
+  });
+
+  function renderState(s) {
+    const a = s.playerA, b = s.playerB;
+
+    el('live-a').textContent = a.height + 'm  |  record ' + a.maxHeight + 'm';
+    el('live-b').textContent = b.height + 'm  |  record ' + b.maxHeight + 'm';
+    el('falls-a').textContent = a.falls;
+    el('falls-b').textContent = b.falls;
+
+    // Pré-remplir les noms si vides
+    if (!el('name-a').value) el('name-a').value = a.name;
+    if (!el('name-b').value) el('name-b').value = b.name;
+
+    el('last-update').textContent = 'Mis à jour ' + new Date().toLocaleTimeString();
+  }
+
+  // ─── Actions ─────────────────────────────────────────────────────────────
+
+  function setName(pid) {
+    const name = el('name-' + pid.slice(-1).toLowerCase()).value.trim();
+    if (!name) return;
+    adminSet(pid, { name });
+  }
+
+  function setHeight(pid) {
+    const v = parseFloat(el('height-' + pid.slice(-1).toLowerCase()).value);
+    if (isNaN(v)) return toast('Valeur invalide', true);
+    adminSet(pid, { height: v });
+    el('height-' + pid.slice(-1).toLowerCase()).value = '';
+  }
+
+  function setMaxHeight(pid) {
+    const v = parseFloat(el('maxheight-' + pid.slice(-1).toLowerCase()).value);
+    if (isNaN(v)) return toast('Valeur invalide', true);
+    adminSet(pid, { maxHeight: v });
+    el('maxheight-' + pid.slice(-1).toLowerCase()).value = '';
+  }
+
+  function adjFalls(pid, delta) {
+    const current = state[pid]?.falls ?? 0;
+    adminSet(pid, { falls: Math.max(0, current + delta) });
+  }
+
+  function setFalls(pid, val) {
+    adminSet(pid, { falls: val });
+  }
+
+  function resetPlayer(pid) {
+    const name = pid === 'playerA' ? (state.playerA?.name || 'Player A') : (state.playerB?.name || 'Player B');
+    if (!confirm('Reset complet de ' + name + ' ?')) return;
+    fetch('/api/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ playerId: pid }) });
+    toast('Reset ' + name);
+  }
+
+  function resetAll() {
+    if (!confirm('Reset TOTAL des deux joueurs ? (nouveau run)')) return;
+    fetch('/api/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({}) });
+    toast('Reset total effectue');
+  }
+
+  function adminSet(pid, fields) {
+    fetch('/api/admin/set', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: pid, ...fields }),
+    }).then(() => toast('Mis a jour'));
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────
+
+  function setOnline(on) {
+    el('dot').className = 'dot' + (on ? ' on' : '');
+    el('status-txt').textContent = on ? 'Connecte au serveur' : 'Deconnecte';
+  }
+
+  function el(id) { return document.getElementById(id); }
+
+  let tt;
+  function toast(msg, err = false) {
+    const t = el('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (err ? ' err' : '');
+    clearTimeout(tt);
+    tt = setTimeout(() => t.className = 'toast', 2000);
+  }
+</script>
+</body>
+</html>

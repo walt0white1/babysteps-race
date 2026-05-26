@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Baby Steps — Overlay</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --a:      #3b82f6;
+      --b:      #f43f5e;
+      --bg:     rgba(10, 10, 16, 0.82);
+      --surface: rgba(20, 20, 30, 0.9);
+      --border: rgba(255,255,255,0.08);
+      --text:   #f1f5f9;
+      --muted:  #94a3b8;
+      --gold:   #f59e0b;
+    }
+
+    body {
+      background: transparent;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      width: 480px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    /* ── Main card ─────────────────────────────────────────────────────────── */
+    .overlay-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .race-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .leader-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: background 0.4s, color 0.4s;
+    }
+    .leader-badge.a  { background: var(--a); color: #fff; }
+    .leader-badge.b  { background: var(--b); color: #fff; }
+    .leader-badge.tie { background: var(--gold); color: #000; }
+
+    /* ── Player rows ────────────────────────────────────────────────────────── */
+    .players {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-info {
+      width: 100px;
+      flex-shrink: 0;
+    }
+    .player-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-height {
+      font-size: 1.3rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+    .player-height span {
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+    .player-falls {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* ── Progress bar ───────────────────────────────────────────────────────── */
+    .bar-wrap {
+      flex: 1;
+      height: 22px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 11px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 11px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 0;
+      position: relative;
+    }
+    .bar-fill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 6px;
+      background: rgba(255,255,255,0.35);
+      border-radius: 0 11px 11px 0;
+    }
+
+    /* Repere record */
+    .bar-record {
+      position: absolute;
+      top: -2px; bottom: -2px;
+      width: 3px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 2px;
+      box-shadow: 0 0 6px rgba(255,255,255,0.6);
+      transition: left 0.4s ease;
+      pointer-events: none;
+    }
+    .bar-a { background: linear-gradient(90deg, #1d4ed8, var(--a)); }
+    .bar-b { background: linear-gradient(90deg, #9f1239, var(--b)); }
+
+    .bar-label {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      pointer-events: none;
+    }
+
+    /* ── Separator + diff ───────────────────────────────────────────────────── */
+    .diff-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .diff-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .diff-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .diff-badge.leading-a { color: var(--a); }
+    .diff-badge.leading-b { color: var(--b); }
+
+    /* ── Lead change flash ──────────────────────────────────────────────────── */
+    @keyframes leadFlash {
+      0%   { opacity: 0; transform: scale(0.8) translateY(-4px); }
+      20%  { opacity: 1; transform: scale(1.05) translateY(0); }
+      80%  { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-6px); }
+    }
+    .lead-change-anim {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      text-align: center;
+      padding: 10px;
+      font-size: 1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      animation: leadFlash 3s ease forwards;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── Fall animation ─────────────────────────────────────────────────────── */
+    @keyframes fallBounce {
+      0%   { opacity: 0; transform: translateY(-20px) scale(1.2); }
+      30%  { opacity: 1; transform: translateY(0) scale(1); }
+      70%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .fall-anim {
+      position: fixed;
+      font-size: 1.4rem;
+      font-weight: 900;
+      animation: fallBounce 2s ease forwards;
+      pointer-events: none;
+      z-index: 998;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    /* ── Offline dot ────────────────────────────────────────────────────────── */
+    .offline-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .online-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay-card" id="card">
+  <div class="header">
+    <div class="race-title">🏔️ Baby Steps Race</div>
+    <div class="leader-badge tie" id="leader-badge">Égalité</div>
+  </div>
+
+  <div class="players">
+    <!-- Player A -->
+    <div class="player-row">
+      <div class="player-info">
+        <div class="player-name" id="name-a" style="color:var(--a)">Player A</div>
+        <div class="player-height" id="height-a" style="color:var(--a)">0<span>m</span></div>
+        <div class="player-falls" id="falls-a">💀 0 chutes</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-fill bar-a" id="bar-a" style="width:0%"></div>
+        <div class="bar-record" id="record-a" style="left:0%"></div>
+      </div>
+    </div>
+
+    <!-- Player B -->
+    <div class="player-row">
+      <div class="player-info">
+        <div class="player-name" id="name-b" style="color:var(--b)">Player B</div>
+        <div class="player-height" id="height-b" style="color:var(--b)">0<span>m</span></div>
+        <div class="player-falls" id="falls-b">💀 0 chutes</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-fill bar-b" id="bar-b" style="width:0%"></div>
+        <div class="bar-record" id="record-b" style="left:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff -->
+  <div class="diff-row">
+    <div class="diff-line"></div>
+    <div class="diff-badge" id="diff-badge">Écart : 0m</div>
+    <div class="diff-line"></div>
+  </div>
+</div>
+
+<script>
+  const SERVER   = window.location.origin;
+  const MAX_H    = 1200; // meters — adjust to match your game
+
+  const socket   = io(SERVER);
+
+  let prevLeader = null;
+
+  socket.on('state_sync', applyState);
+
+  socket.on('lead_change', ({ leader, state }) => {
+    applyState(state);
+    flashLeadChange(leader, state);
+  });
+
+  socket.on('fall', ({ playerId }) => {
+    spawnFallAnim(playerId);
+  });
+
+  function applyState(s) {
+    const a = s.playerA;
+    const b = s.playerB;
+
+    // Names + heights
+    el('name-a').innerHTML  = a.name + statusDot(a.online);
+    el('name-b').innerHTML  = b.name + statusDot(b.online);
+
+    el('height-a').innerHTML  = `${Math.round(a.height)}<span>m</span>`;
+    el('height-b').innerHTML  = `${Math.round(b.height)}<span>m</span>`;
+
+    el('falls-a').textContent = `💀 ${a.falls} chute${a.falls !== 1 ? 's' : ''}`;
+    el('falls-b').textContent = `💀 ${b.falls} chute${b.falls !== 1 ? 's' : ''}`;
+
+    // Bars
+    const topH = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
+    const scaleBase = Math.max(topH, MAX_H * 0.1);
+
+    // Barre = position actuelle
+    el('bar-a').style.width = pct(a.height, scaleBase) + '%';
+    el('bar-b').style.width = pct(b.height, scaleBase) + '%';
+
+    // Repere blanc = record
+    el('record-a').style.left = pct(a.maxHeight, scaleBase) + '%';
+    el('record-b').style.left = pct(b.maxHeight, scaleBase) + '%';
+
+    // Leader badge
+    const diff   = Math.abs(a.height - b.height);
+    const leader = a.height > b.height ? 'a'
+                 : b.height > a.height ? 'b'
+                 : 'tie';
+
+    const badge = el('leader-badge');
+    const diffEl = el('diff-badge');
+
+    if (leader === 'tie') {
+      badge.className   = 'leader-badge tie';
+      badge.textContent = 'Égalité';
+      diffEl.className  = 'diff-badge';
+      diffEl.textContent = 'Écart : 0m';
+    } else {
+      const name = leader === 'a' ? a.name : b.name;
+      badge.className   = `leader-badge ${leader}`;
+      badge.textContent = `👑 ${name}`;
+      diffEl.className  = `diff-badge leading-${leader}`;
+      diffEl.textContent = `+${Math.round(diff)}m pour ${name}`;
+    }
+  }
+
+  function flashLeadChange(leader, state) {
+    const name  = leader === 'playerA' ? state.playerA.name : state.playerB.name;
+    const color = leader === 'playerA' ? '#3b82f6' : '#f43f5e';
+
+    const div = document.createElement('div');
+    div.className = 'lead-change-anim';
+    div.style.color = color;
+    div.style.textShadow = `0 0 20px ${color}`;
+    div.textContent = `👑 ${name} prend la tête !`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3100);
+  }
+
+  function spawnFallAnim(playerId) {
+    const isA   = playerId === 'playerA';
+    const div   = document.createElement('div');
+    div.className = 'fall-anim';
+    div.style.color = isA ? '#3b82f6' : '#f43f5e';
+    div.style.top   = isA ? '70px' : '110px';
+    div.style.left  = (60 + Math.random() * 80) + 'px';
+    div.textContent = '💀 CHUTE !';
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2100);
+  }
+
+  function statusDot(online) {
+    return `<span class="${online ? 'online' : 'offline'}-dot"></span>`;
+  }
+
+  function pct(val, max) {
+    return Math.min(100, Math.max(0, (val / max) * 100)).toFixed(2);
+  }
+
+  function el(id) { return document.getElementById(id); }
+</script>
+</body>
+</html>

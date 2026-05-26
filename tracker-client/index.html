@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baby Steps — Tracker</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #0f0f13;
+      --surface:  #1a1a24;
+      --border:   #2a2a3a;
+      --accent-a: #3b82f6;
+      --accent-b: #f43f5e;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --success:  #22c55e;
+      --danger:   #ef4444;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    h1 span { color: var(--accent); }
+
+    /* Status dot */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      transition: background 0.3s;
+    }
+    .dot.online { background: var(--success); }
+
+    /* Player name */
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    /* Height display */
+    .height-display {
+      text-align: center;
+    }
+    .height-number {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .height-unit {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Quick step buttons */
+    .quick-btns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .quick-btns button {
+      padding: 10px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .quick-btns button:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Manual height input */
+    .manual-row {
+      display: flex;
+      gap: 8px;
+    }
+    .manual-row input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .manual-row input:focus { border-color: var(--accent); }
+    .manual-row button {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Action buttons */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn {
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-fall {
+      background: var(--danger);
+      color: #fff;
+      font-size: 1.1rem;
+    }
+    .btn-reset {
+      background: var(--border);
+      color: var(--muted);
+    }
+    .btn-reset:hover { background: #3a3a4a; color: var(--text); }
+
+    /* Falls counter */
+    .falls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+    .falls-count { font-size: 1.1rem; font-weight: 700; color: var(--danger); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--success);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🏔️ Baby Steps — <span id="title-player">Tracker</span></h1>
+
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span id="status-text">Connexion…</span>
+  </div>
+
+  <div class="field">
+    <label>Nom du joueur</label>
+    <input type="text" id="player-name" placeholder="Entrez votre pseudo" />
+  </div>
+
+  <div class="height-display">
+    <div class="height-number" id="height-display">0</div>
+    <div class="height-unit">mètres</div>
+  </div>
+
+  <!-- Quick increments -->
+  <div>
+    <label style="display:block;font-size:0.8rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Ajout rapide</label>
+    <div class="quick-btns">
+      <button onclick="addHeight(1)">+1m</button>
+      <button onclick="addHeight(5)">+5m</button>
+      <button onclick="addHeight(10)">+10m</button>
+      <button onclick="addHeight(50)">+50m</button>
+    </div>
+  </div>
+
+  <!-- Manual set -->
+  <div>
+    <label style="display:block;font-size:0.8rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Hauteur exacte</label>
+    <div class="manual-row">
+      <input type="number" id="manual-height" placeholder="ex: 342" min="0" />
+      <button onclick="setManualHeight()">SET</button>
+    </div>
+  </div>
+
+  <!-- Fall + Reset -->
+  <div class="action-row">
+    <button class="btn btn-fall" onclick="recordFall()">💀 CHUTE</button>
+    <button class="btn btn-reset" onclick="resetPlayer()">↺ Reset</button>
+  </div>
+
+  <div class="falls-row">
+    <span>Chutes totales</span>
+    <span class="falls-count" id="falls-count">0</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── Config ────────────────────────────────────────────────────────────────
+  const SERVER = window.location.origin;
+  const params = new URLSearchParams(window.location.search);
+  const PLAYER_ID = params.get('player') || 'playerA';
+  const ACCENT = PLAYER_ID === 'playerA' ? '#3b82f6' : '#f43f5e';
+
+  // Apply player color
+  document.documentElement.style.setProperty('--accent', ACCENT);
+  document.getElementById('title-player').textContent =
+    PLAYER_ID === 'playerA' ? 'Player A' : 'Player B';
+
+  // ─── State ─────────────────────────────────────────────────────────────────
+  let currentHeight = 0;
+  let currentFalls  = 0;
+
+  // ─── Socket ────────────────────────────────────────────────────────────────
+  const socket = io(SERVER);
+
+  socket.on('connect', () => {
+    setStatus(true);
+    toast('Connecté au serveur');
+  });
+
+  socket.on('disconnect', () => setStatus(false));
+
+  socket.on('state_sync', (fullState) => {
+    const me = fullState[PLAYER_ID];
+    if (!me) return;
+    currentHeight = me.height;
+    currentFalls  = me.falls;
+    document.getElementById('height-display').textContent = Math.round(currentHeight);
+    document.getElementById('falls-count').textContent    = currentFalls;
+    if (me.name && !document.getElementById('player-name').value) {
+      document.getElementById('player-name').value = me.name;
+    }
+  });
+
+  // ─── Actions ───────────────────────────────────────────────────────────────
+  function addHeight(delta) {
+    sendUpdate(currentHeight + delta);
+  }
+
+  function setManualHeight() {
+    const val = parseFloat(document.getElementById('manual-height').value);
+    if (isNaN(val) || val < 0) { toast('Valeur invalide', true); return; }
+    sendUpdate(val);
+    document.getElementById('manual-height').value = '';
+  }
+
+  function recordFall() {
+    socket.emit('fall', { playerId: PLAYER_ID });
+    currentFalls++;
+    document.getElementById('falls-count').textContent = currentFalls;
+    toast('Chute enregistrée 💀', true);
+  }
+
+  function resetPlayer() {
+    if (!confirm('Remettre ta progression à zéro ?')) return;
+    socket.emit('player_reset', { playerId: PLAYER_ID });
+    toast('Reset effectué');
+  }
+
+  function sendUpdate(height) {
+    const name = document.getElementById('player-name').value.trim() || undefined;
+    currentHeight = Math.max(0, height);
+    document.getElementById('height-display').textContent = Math.round(currentHeight);
+    socket.emit('update_player', { playerId: PLAYER_ID, height: currentHeight, name });
+    toast(`Hauteur : ${Math.round(currentHeight)}m`);
+  }
+
+  // ─── UI helpers ────────────────────────────────────────────────────────────
+  function setStatus(online) {
+    document.getElementById('dot').className       = 'dot' + (online ? ' online' : '');
+    document.getElementById('status-text').textContent = online ? 'Connecté' : 'Déconnecté';
+  }
+
+  let toastTimer;
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className   = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = 'toast'; }, 2000);
+  }
+
+  // Send name on blur
+  document.getElementById('player-name').addEventListener('blur', () => {
+    const name = document.getElementById('player-name').value.trim();
+    if (name) socket.emit('update_player', { playerId: PLAYER_ID, height: currentHeight, name });
+  });
+
+  // Enter key on manual height
+  document.getElementById('manual-height').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') setManualHeight();
+  });
+</script>
+</body>
+</html>
