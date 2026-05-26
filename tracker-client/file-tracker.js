@@ -3,10 +3,15 @@
 // Usage : node file-tracker.js playerA
 //         node file-tracker.js playerB
 
-const fs   = require('fs');
-const http = require('http');
+const fs    = require('fs');
+const http  = require('http');
+const https = require('https');
 
 const PLAYER_ID  = process.argv[2] || 'playerA';
+
+// Accepte soit SERVER_URL (URL complete, ex: https://babysteps-race.onrender.com)
+// soit SERVER + PORT (localhost)
+const SERVER_URL = process.env.SERVER_URL || null;
 const SERVER     = process.env.SERVER || 'localhost';
 const PORT       = process.env.PORT   || 3001;
 
@@ -22,9 +27,11 @@ function findSavePath() {
 }
 const SAVE_PATH = findSavePath();
 
+const BASE_URL = SERVER_URL || `http://${SERVER}:${PORT}`;
+
 console.log(`[Tracker] Joueur : ${PLAYER_ID}`);
 console.log(`[Tracker] Fichier : ${SAVE_PATH}`);
-console.log(`[Tracker] Serveur : http://${SERVER}:${PORT}\n`);
+console.log(`[Tracker] Serveur : ${BASE_URL}\n`);
 
 // Verifie que le fichier existe
 if (!fs.existsSync(SAVE_PATH)) {
@@ -78,16 +85,34 @@ function computeHeight(buf) {
 
 function sendHeight(height, maxHeight) {
   const body = JSON.stringify({ playerId: PLAYER_ID, height, maxHeight });
-  const req  = http.request({
-    hostname: SERVER,
-    port:     PORT,
-    path:     '/api/update',
-    method:   'POST',
-    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
-  });
-  req.on('error', () => {});
-  req.write(body);
-  req.end();
+
+  if (SERVER_URL) {
+    // URL complete (ex: https://babysteps-race.onrender.com)
+    const url      = new URL('/api/update', SERVER_URL);
+    const lib      = url.protocol === 'https:' ? https : http;
+    const port     = url.port || (url.protocol === 'https:' ? 443 : 80);
+    const req = lib.request({
+      hostname: url.hostname,
+      port,
+      path:     '/api/update',
+      method:   'POST',
+      headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+    });
+    req.on('error', () => {});
+    req.write(body);
+    req.end();
+  } else {
+    const req = http.request({
+      hostname: SERVER,
+      port:     PORT,
+      path:     '/api/update',
+      method:   'POST',
+      headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+    });
+    req.on('error', () => {});
+    req.write(body);
+    req.end();
+  }
 }
 
 // ─── Watcher ──────────────────────────────────────────────────────────────
