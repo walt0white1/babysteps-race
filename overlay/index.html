@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Baby Steps — Mountain Overlay</title>
+  <title>Baby Steps — Overlay</title>
   <script src="/socket.io/socket.io.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Big+Shoulders+Display:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Big+Shoulders+Display:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
     /* =========================================================================
-       BABY STEPS — Mountain overlay
-       The mountain IS the visualization. Climbers glow at their altitudes.
+       BABY STEPS — Discreet corner chip
+       Minimal, low-profile, doesn't fight the gameplay.
        ========================================================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --a:      #22d3ee;
-      --a-glow: rgba(34, 211, 238, 0.7);
+      --a-glow: rgba(34, 211, 238, 0.5);
       --b:      #fbbf24;
-      --b-glow: rgba(251, 191, 36, 0.7);
-      --shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,0,0,0.7);
+      --b-glow: rgba(251, 191, 36, 0.5);
+      --shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.7);
     }
 
     html, body {
@@ -29,7 +29,7 @@
       overflow: hidden;
       color: #fff;
       -webkit-font-smoothing: antialiased;
-      font-family: 'Fraunces', serif;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     body {
@@ -37,376 +37,160 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 16px;
     }
 
-    /* ========== SCENE ========== */
-    .scene {
-      position: relative;
-      width: 280px;
-      height: 240px;
+    /* ========== CHIP ========== */
+    .chip {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    /* Mountain SVG fills the scene */
-    .mountain {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0 12px 32px rgba(0,0,0,0.7));
-    }
-
-    /* Snow particles drifting (subtle) */
-    @keyframes snow {
-      0%   { transform: translateY(0) translateX(0); opacity: 0; }
-      10%  { opacity: 0.6; }
-      90%  { opacity: 0.6; }
-      100% { transform: translateY(460px) translateX(-30px); opacity: 0; }
-    }
-    .snow {
-      position: absolute;
-      top: -10px;
-      width: 2px; height: 2px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 50%;
-      animation: snow linear infinite;
-      pointer-events: none;
-    }
-
-    /* ========== CLIMBER ========== */
-    .climber {
-      position: absolute;
-      left: 50%;
-      bottom: 0%;
-      transform: translate(-50%, 50%);
-      transition: bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                  left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 5;
-      pointer-events: none;
-    }
-    .climber[data-p="b"] { z-index: 4; }
-
-    /* Glowing dot — the climber */
-    .climber__dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%,
-        rgba(255,255,255,0.95) 0%,
-        var(--c) 40%,
-        var(--c-deep) 100%);
-      box-shadow:
-        0 0 12px var(--c-glow),
-        0 0 28px var(--c-glow),
-        0 0 50px var(--c-glow),
-        inset 0 1px 0 rgba(255,255,255,0.4);
-      position: relative;
-      animation: bob 3.4s ease-in-out infinite;
-    }
-    .climber[data-p="a"] .climber__dot {
-      --c: var(--a);
-      --c-deep: #155e75;
+    /* ========== ROW ========== */
+    .row {
+      --c:      var(--a);
       --c-glow: var(--a-glow);
+
+      display: grid;
+      grid-template-columns: 60px 50px 90px 26px;
+      align-items: center;
+      gap: 10px;
+      height: 22px;
     }
-    .climber[data-p="b"] .climber__dot {
-      --c: var(--b);
-      --c-deep: #78350f;
+    .row[data-p="b"] {
+      --c:      var(--b);
       --c-glow: var(--b-glow);
     }
-    @keyframes bob {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-3px); }
-    }
 
-    /* Trail behind climber */
-    .climber__trail {
-      position: absolute;
-      left: 50%; bottom: 0;
-      transform: translateX(-50%);
-      width: 1px;
-      background: linear-gradient(180deg,
-        var(--c-glow) 0%,
-        transparent 100%);
-      pointer-events: none;
-    }
-    .climber[data-p="a"] .climber__trail { --c-glow: var(--a-glow); }
-    .climber[data-p="b"] .climber__trail { --c-glow: var(--b-glow); }
-
-    /* ========== LABEL CARD floating beside the climber ========== */
-    .label {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      z-index: 6;
-      transition: bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .label[data-side="left"]  { right: calc(100% + 8px); text-align: right; }
-    .label[data-side="right"] { left:  calc(100% + 8px); text-align: left;  }
-
-    .label__line {
-      position: absolute;
-      top: 50%;
-      height: 1px;
-      width: 6px;
-      background: linear-gradient(90deg, var(--c-glow), transparent);
-      transition: background 0.4s;
-    }
-    .label[data-side="left"]  .label__line { left:  100%; background: linear-gradient(90deg, transparent, var(--c-glow)); }
-    .label[data-side="right"] .label__line { right: 100%; background: linear-gradient(90deg, var(--c-glow), transparent); }
-    .climber[data-p="a"] .label__line { --c-glow: var(--a-glow); }
-    .climber[data-p="b"] .label__line { --c-glow: var(--b-glow); }
-
-    .label__name {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
+    /* Name — small mono uppercase */
+    .name {
+      font-size: 10px;
       font-weight: 600;
-      font-size: 12px;
-      letter-spacing: -0.005em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c);
       text-shadow: var(--shadow);
-      font-variation-settings: "opsz" 144;
-      line-height: 1;
-      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .climber[data-p="a"] .label__name { color: var(--a); }
-    .climber[data-p="b"] .label__name { color: var(--b); }
 
-    .label__alt {
+    /* Altitude — big-ish but compact */
+    .alt {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-weight: 900;
-      font-size: 26px;
-      line-height: 0.85;
-      letter-spacing: -0.03em;
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1;
       color: #fff;
-      text-shadow: var(--shadow);
+      letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+      text-align: right;
     }
-    .label__alt small {
+    .alt small {
       font-family: 'JetBrains Mono', monospace;
       font-size: 8px;
       font-weight: 600;
-      letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.65);
-      margin-left: 2px;
-    }
-
-    .label__meta {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+      letter-spacing: 0.15em;
       color: rgba(255,255,255,0.55);
-      text-shadow: var(--shadow);
-      margin-top: 3px;
-      white-space: nowrap;
-    }
-    .label__meta strong {
-      color: #fff;
-      font-weight: 700;
-      margin-right: 1px;
+      margin-left: 1px;
     }
 
-    /* Peak marker (record altitude) — small horizontal tick on the mountain */
-    .peak-marker {
+    /* Bar — thin, discreet */
+    .bar {
+      height: 4px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 2px;
+      position: relative;
+      overflow: visible;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+    .bar__fill {
       position: absolute;
-      left: 50%;
-      transform: translate(-50%, 50%);
-      width: 14px;
-      height: 1px;
-      background: rgba(255,255,255,0.5);
-      transition: bottom 0.6s ease;
-      z-index: 3;
+      top: 0; left: 0; bottom: 0;
+      width: 0%;
+      border-radius: 2px;
+      background: var(--c);
+      box-shadow: 0 0 6px var(--c-glow);
+      transition: width 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .bar__rec {
+      position: absolute;
+      top: -2px; bottom: -2px;
+      width: 1.5px;
+      background: rgba(255,255,255,0.7);
+      box-shadow: 0 0 3px rgba(255,255,255,0.5);
+      transition: left 0.5s ease;
       pointer-events: none;
     }
-    .peak-marker::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: -2.5px;
-      transform: translateX(-50%);
-      width: 3px; height: 3px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 50%;
-      box-shadow: 0 0 4px rgba(255,255,255,0.6);
-    }
-    .peak-marker[data-p="a"] { left: 38%; }
-    .peak-marker[data-p="b"] { left: 62%; }
 
-    /* ========== HEADER ========== */
-    .scene__title {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
+    /* Falls (compact) */
+    .falls {
+      font-size: 9px;
       font-weight: 600;
-      letter-spacing: 0.35em;
-      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.5);
       text-shadow: var(--shadow);
-      text-transform: uppercase;
-      pointer-events: none;
-      z-index: 10;
+      text-align: right;
     }
 
     /* ========== ANIMATIONS ========== */
     @keyframes leadEnter {
-      0%   { opacity: 0; transform: translateY(-8px); }
+      0%   { opacity: 0; transform: translateY(-6px); }
       18%  { opacity: 1; transform: translateY(0); }
       82%  { opacity: 1; }
-      100% { opacity: 0; transform: translateY(-4px); }
+      100% { opacity: 0; transform: translateY(-3px); }
     }
     .flash {
       position: fixed;
-      top: 18px; left: 0; right: 0;
+      top: 4px; left: 0; right: 0;
       text-align: center;
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 600;
-      font-size: 16px;
-      letter-spacing: 0.18em;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
       pointer-events: none;
-      animation: leadEnter 3s ease forwards;
+      animation: leadEnter 2.6s ease forwards;
       z-index: 999;
+      text-shadow: var(--shadow);
     }
 
-    @keyframes climberFall {
-      0%   { transform: translate(-50%, 50%) scale(1) rotate(0); }
-      30%  { transform: translate(-50%, 50%) scale(1.2) rotate(15deg); }
-      60%  { transform: translate(-50%, 50%) scale(0.9) rotate(-10deg); }
-      100% { transform: translate(-50%, 50%) scale(1) rotate(0); }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      30%      { transform: translateX(-2px); }
+      60%      { transform: translateX(2px); }
     }
-    .climber.falling { animation: climberFall 0.7s ease; }
+    .row.shaking { animation: shake 0.3s ease; }
 
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<div class="scene" id="scene">
+<div class="chip">
 
-  <div class="scene__title">⛰  BABY STEPS  ·  LIVE  ⛰</div>
-
-  <!-- MOUNTAIN SVG (jagged peak silhouette with snow cap) -->
-  <svg class="mountain" viewBox="0 0 540 480" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Mountain body gradient -->
-      <linearGradient id="mountGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#1e293b" stop-opacity="0.95"/>
-        <stop offset="40%"  stop-color="#0f172a" stop-opacity="0.95"/>
-        <stop offset="100%" stop-color="#020617" stop-opacity="0.95"/>
-      </linearGradient>
-      <!-- Snow cap gradient -->
-      <linearGradient id="snowGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"  stop-color="#f8fafc" stop-opacity="0.95"/>
-        <stop offset="60%" stop-color="#cbd5e1" stop-opacity="0.7"/>
-        <stop offset="100%" stop-color="#cbd5e1" stop-opacity="0"/>
-      </linearGradient>
-      <!-- Inner glow at peak -->
-      <radialGradient id="peakGlow" cx="50%" cy="15%" r="40%">
-        <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.15"/>
-        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-
-    <!-- Background atmospheric glow at peak -->
-    <rect width="540" height="480" fill="url(#peakGlow)"/>
-
-    <!-- Mountain silhouette (jagged irregular peak) -->
-    <path d="
-      M 0 480
-      L 0 410
-      L 60 380
-      L 110 340
-      L 150 320
-      L 195 280
-      L 230 220
-      L 250 160
-      L 270 60
-      L 290 130
-      L 310 90
-      L 335 180
-      L 365 230
-      L 400 270
-      L 440 310
-      L 485 340
-      L 540 380
-      L 540 480
-      Z
-    " fill="url(#mountGrad)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-
-    <!-- Snow cap on top -->
-    <path d="
-      M 230 220
-      L 250 160
-      L 270 60
-      L 290 130
-      L 310 90
-      L 335 180
-      L 320 195
-      L 295 145
-      L 275 100
-      L 258 175
-      L 240 235
-      Z
-    " fill="url(#snowGrad)"/>
-
-    <!-- Subtle contour lines (topographic feel) -->
-    <g stroke="rgba(255,255,255,0.04)" stroke-width="0.8" fill="none">
-      <path d="M 0 410 Q 270 360 540 380"/>
-      <path d="M 30 390 Q 270 320 510 360"/>
-      <path d="M 70 360 Q 270 290 470 340"/>
-      <path d="M 120 320 Q 270 250 420 310"/>
-    </g>
-
-    <!-- Distant peak silhouette layer (depth) -->
-    <path d="
-      M 0 460
-      L 0 430
-      L 80 415
-      L 140 395
-      L 200 410
-      L 270 380
-      L 340 405
-      L 410 390
-      L 470 410
-      L 540 425
-      L 540 460
-      Z
-    " fill="rgba(255,255,255,0.025)"/>
-  </svg>
-
-  <!-- Falling snow particles -->
-  <div id="snow-container"></div>
-
-  <!-- Peak marker A (record) -->
-  <div class="peak-marker" data-p="a" id="peak-marker-a" style="bottom:0%"></div>
-  <!-- Peak marker B (record) -->
-  <div class="peak-marker" data-p="b" id="peak-marker-b" style="bottom:0%"></div>
-
-  <!-- Climber A (on left side of mountain) -->
-  <div class="climber" data-p="a" id="climber-a" style="left:38%;bottom:0%">
-    <div class="climber__trail" id="trail-a" style="height:0px"></div>
-    <div class="climber__dot"></div>
-    <div class="label" data-side="left">
-      <div class="label__line"></div>
-      <div class="label__name" id="name-a">Matteo</div>
-      <div class="label__alt"><span id="num-a">0</span><small>M</small></div>
-      <div class="label__meta"><strong id="peak-a">0</strong>peak · <strong id="falls-a">0</strong>fall</div>
+  <!-- ── PLAYER A ── -->
+  <div class="row" data-p="a" id="row-a">
+    <div class="name" id="name-a">MATTEO</div>
+    <div class="alt"><span id="num-a">0</span><small>M</small></div>
+    <div class="bar">
+      <div class="bar__fill" id="fill-a" style="width:0%"></div>
+      <div class="bar__rec" id="rec-a" style="left:0%"></div>
     </div>
+    <div class="falls" id="falls-a">0</div>
   </div>
 
-  <!-- Climber B (on right side of mountain) -->
-  <div class="climber" data-p="b" id="climber-b" style="left:62%;bottom:0%">
-    <div class="climber__trail" id="trail-b" style="height:0px"></div>
-    <div class="climber__dot"></div>
-    <div class="label" data-side="right">
-      <div class="label__line"></div>
-      <div class="label__name" id="name-b">Abdou</div>
-      <div class="label__alt"><span id="num-b">0</span><small>M</small></div>
-      <div class="label__meta"><strong id="peak-b">0</strong>peak · <strong id="falls-b">0</strong>fall</div>
+  <!-- ── PLAYER B ── -->
+  <div class="row" data-p="b" id="row-b">
+    <div class="name" id="name-b">ABDOU</div>
+    <div class="alt"><span id="num-b">0</span><small>M</small></div>
+    <div class="bar">
+      <div class="bar__fill" id="fill-b" style="width:0%"></div>
+      <div class="bar__rec" id="rec-b" style="left:0%"></div>
     </div>
+    <div class="falls" id="falls-b">0</div>
   </div>
 
 </div>
@@ -416,72 +200,31 @@
   const SOLO_PLAYER = params.get('player');
   const MAX_H       = 1200;
 
-  // Solo mode: hide other climber + recenter remaining one
-  if (SOLO_PLAYER === 'playerA') {
-    el('climber-b').classList.add('hidden');
-    el('peak-marker-b').classList.add('hidden');
-    el('climber-a').style.left = '50%';
-    el('peak-marker-a').style.left = '50%';
-  } else if (SOLO_PLAYER === 'playerB') {
-    el('climber-a').classList.add('hidden');
-    el('peak-marker-a').classList.add('hidden');
-    el('climber-b').style.left = '50%';
-    el('peak-marker-b').style.left = '50%';
-    el('climber-b').querySelector('.label').setAttribute('data-side', 'left');
-  }
-
-  // Generate falling snow particles
-  const snowContainer = document.getElementById('snow-container');
-  for (let i = 0; i < 12; i++) {
-    const s = document.createElement('div');
-    s.className = 'snow';
-    s.style.left = Math.random() * 100 + '%';
-    s.style.animationDuration = (8 + Math.random() * 8) + 's';
-    s.style.animationDelay = (Math.random() * 8) + 's';
-    snowContainer.appendChild(s);
-  }
+  if (SOLO_PLAYER === 'playerA') el('row-b').classList.add('hidden');
+  else if (SOLO_PLAYER === 'playerB') el('row-a').classList.add('hidden');
 
   const socket = io(window.location.origin);
   socket.on('state_sync', applyState);
   socket.on('lead_change', ({ leader, state }) => { applyState(state); flashLead(leader, state); });
-  socket.on('fall', ({ playerId }) => { fallAnim(playerId); });
+  socket.on('fall', ({ playerId }) => { shakeFall(playerId); });
 
   function applyState(s) {
     const a = s.playerA, b = s.playerB;
 
-    setText('name-a', a.name || 'Matteo');
-    setText('name-b', b.name || 'Abdou');
+    setText('name-a', (a.name || 'Matteo').toUpperCase());
+    setText('name-b', (b.name || 'Abdou').toUpperCase());
     setText('num-a',  Math.round(a.height));
     setText('num-b',  Math.round(b.height));
-    setText('peak-a', Math.round(a.maxHeight));
-    setText('peak-b', Math.round(b.maxHeight));
-    setText('falls-a', a.falls);
-    setText('falls-b', b.falls);
+    setText('falls-a', '💀' + a.falls);
+    setText('falls-b', '💀' + b.falls);
 
-    // Climber altitude → vertical position on mountain
-    // Mountain "summit" sits around the top 15% of the scene; we map 0-100% of altitude
-    // to 0-85% of the scene height (so even max stays below the peak).
     const top   = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
-    const scale = Math.max(top * 1.1, MAX_H * 0.08);
+    const scale = Math.max(top * 1.05, MAX_H * 0.08);
 
-    const yA = pctScene(a.height, scale);
-    const yB = pctScene(b.height, scale);
-
-    el('climber-a').style.bottom = yA + '%';
-    el('climber-b').style.bottom = yB + '%';
-
-    el('peak-marker-a').style.bottom = pctScene(a.maxHeight, scale) + '%';
-    el('peak-marker-b').style.bottom = pctScene(b.maxHeight, scale) + '%';
-
-    // Trail height = how high the climber has come from the base (scene height ~240px)
-    el('trail-a').style.height = (yA * 2.3) + 'px';
-    el('trail-b').style.height = (yB * 2.3) + 'px';
-  }
-
-  function pctScene(v, m) {
-    // Map 0..m  →  5..85 (% of scene height) so climbers stay on the mountain silhouette
-    const raw = Math.min(1, Math.max(0, v / m));
-    return (5 + raw * 80).toFixed(2);
+    el('fill-a').style.width = pct(a.height,    scale) + '%';
+    el('fill-b').style.width = pct(b.height,    scale) + '%';
+    el('rec-a').style.left   = pct(a.maxHeight, scale) + '%';
+    el('rec-b').style.left   = pct(b.maxHeight, scale) + '%';
   }
 
   function flashLead(leader, state) {
@@ -489,22 +232,22 @@
     if (leader === 'tie') return;
     const name  = leader === 'playerA' ? (state.playerA.name || 'Matteo') : (state.playerB.name || 'Abdou');
     const color = leader === 'playerA' ? '#22d3ee' : '#fbbf24';
-    const glow  = leader === 'playerA' ? 'rgba(34,211,238,0.55)' : 'rgba(251,191,36,0.55)';
+    const glow  = leader === 'playerA' ? 'rgba(34,211,238,0.5)' : 'rgba(251,191,36,0.5)';
     const d = document.createElement('div');
     d.className = 'flash';
     d.style.color = color;
-    d.style.textShadow = '0 0 20px ' + glow + ', 0 2px 12px rgba(0,0,0,0.95)';
-    d.textContent = '⛰  ' + name + ' takes the summit';
+    d.style.textShadow = '0 0 14px ' + glow + ', 0 2px 8px rgba(0,0,0,0.95)';
+    d.textContent = '↑ ' + name.toUpperCase() + ' LEADS';
     document.body.appendChild(d);
-    setTimeout(() => d.remove(), 3100);
+    setTimeout(() => d.remove(), 2700);
   }
 
-  function fallAnim(playerId) {
-    const id = playerId === 'playerA' ? 'climber-a' : 'climber-b';
+  function shakeFall(playerId) {
+    const id = playerId === 'playerA' ? 'row-a' : 'row-b';
     const n = el(id);
     if (!n) return;
-    n.classList.add('falling');
-    setTimeout(() => n.classList.remove('falling'), 720);
+    n.classList.add('shaking');
+    setTimeout(() => n.classList.remove('shaking'), 320);
   }
 
   function pct(v, m)      { return Math.min(100, Math.max(0, (v / m) * 100)).toFixed(2); }
