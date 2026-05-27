@@ -6,21 +6,24 @@
   <script src="/socket.io/socket.io.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Big+Shoulders+Display:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Big+Shoulders+Display:wght@500;700;900&display=swap" rel="stylesheet">
 
   <style>
     /* =========================================================================
-       BABY STEPS — Discreet corner chip
-       Minimal, low-profile, doesn't fight the gameplay.
+       BABY STEPS — Versus tug-of-war bar
+       Single horizontal line, both players facing off.
+       Center indicator shifts toward whoever leads.
        ========================================================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --a:      #22d3ee;
-      --a-glow: rgba(34, 211, 238, 0.5);
-      --b:      #fbbf24;
-      --b-glow: rgba(251, 191, 36, 0.5);
-      --shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.7);
+      --a:        #22d3ee;
+      --a-deep:   #0e7490;
+      --a-glow:   rgba(34, 211, 238, 0.55);
+      --b:        #fbbf24;
+      --b-deep:   #92400e;
+      --b-glow:   rgba(251, 191, 36, 0.55);
+      --shadow:   0 1px 2px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.7);
     }
 
     html, body {
@@ -37,103 +40,149 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 16px;
+      padding: 14px;
     }
 
-    /* ========== CHIP ========== */
-    .chip {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    /* ========== ROW ========== */
-    .row {
-      --c:      var(--a);
-      --c-glow: var(--a-glow);
-
+    /* ========== TUG BAR ========== */
+    .tug {
+      width: 460px;
       display: grid;
-      grid-template-columns: 60px 50px 90px 26px;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      gap: 10px;
-      height: 22px;
-    }
-    .row[data-p="b"] {
-      --c:      var(--b);
-      --c-glow: var(--b-glow);
+      gap: 12px;
     }
 
-    /* Name — small mono uppercase */
-    .name {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
+    /* ── Side block (left = A, right = B) ── */
+    .side {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .side--a { justify-content: flex-end; text-align: right; }
+    .side--b { justify-content: flex-start; text-align: left; }
+
+    .side__name {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--c);
       text-shadow: var(--shadow);
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
+    .side--a .side__name { color: var(--a); }
+    .side--b .side__name { color: var(--b); }
 
-    /* Altitude — big-ish but compact */
-    .alt {
+    .side__alt {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-weight: 700;
-      font-size: 22px;
-      line-height: 1;
+      font-weight: 900;
+      font-size: 30px;
+      line-height: 0.9;
       color: #fff;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       font-variant-numeric: tabular-nums;
       text-shadow: var(--shadow);
-      text-align: right;
     }
-    .alt small {
+    .side__alt small {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      color: rgba(255,255,255,0.55);
-      margin-left: 1px;
-    }
-
-    /* Bar — thin, discreet */
-    .bar {
-      height: 4px;
-      background: rgba(0,0,0,0.4);
-      border-radius: 2px;
-      position: relative;
-      overflow: visible;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    }
-    .bar__fill {
-      position: absolute;
-      top: 0; left: 0; bottom: 0;
-      width: 0%;
-      border-radius: 2px;
-      background: var(--c);
-      box-shadow: 0 0 6px var(--c-glow);
-      transition: width 0.75s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .bar__rec {
-      position: absolute;
-      top: -2px; bottom: -2px;
-      width: 1.5px;
-      background: rgba(255,255,255,0.7);
-      box-shadow: 0 0 3px rgba(255,255,255,0.5);
-      transition: left 0.5s ease;
-      pointer-events: none;
-    }
-
-    /* Falls (compact) */
-    .falls {
       font-size: 9px;
       font-weight: 600;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.55);
+      margin-left: 2px;
+      text-shadow: var(--shadow);
+    }
+
+    /* ── Central tug-of-war bar ── */
+    .center {
+      width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tug-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+      position: relative;
+      overflow: visible;
+      box-shadow:
+        inset 0 1px 1px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(255,255,255,0.04);
+    }
+    /* Center tick (50% reference) */
+    .tug-bar::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: -3px; bottom: -3px;
+      width: 1px;
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* Side A fill — fills from center toward LEFT when A leads */
+    .tug__a {
+      position: absolute;
+      top: 0; bottom: 0;
+      right: 50%;
+      width: 0%;
+      background: linear-gradient(270deg,
+        var(--a) 0%,
+        var(--a-deep) 100%);
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 0 8px var(--a-glow);
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* Side B fill — fills from center toward RIGHT when B leads */
+    .tug__b {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 0%;
+      background: linear-gradient(90deg,
+        var(--b) 0%,
+        var(--b-deep) 100%);
+      border-radius: 0 3px 3px 0;
+      box-shadow: 0 0 8px var(--b-glow);
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* Bright leading edges */
+    .tug__a::before {
+      content: '';
+      position: absolute;
+      top: -1px; bottom: -1px;
+      left: -1px;
+      width: 2px;
+      background: #fff;
+      border-radius: 1px;
+      box-shadow: 0 0 6px var(--a), 0 0 14px var(--a-glow);
+    }
+    .tug__b::after {
+      content: '';
+      position: absolute;
+      top: -1px; bottom: -1px;
+      right: -1px;
+      width: 2px;
+      background: #fff;
+      border-radius: 1px;
+      box-shadow: 0 0 6px var(--b), 0 0 14px var(--b-glow);
+    }
+
+    /* Delta text below the bar */
+    .delta {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
       color: rgba(255,255,255,0.5);
       text-shadow: var(--shadow);
-      text-align: right;
+      white-space: nowrap;
+      transition: color 0.4s;
     }
+    .delta.lead-a { color: var(--a); text-shadow: 0 0 8px var(--a-glow), var(--shadow); }
+    .delta.lead-b { color: var(--b); text-shadow: 0 0 8px var(--b-glow), var(--shadow); }
 
     /* ========== ANIMATIONS ========== */
     @keyframes leadEnter {
@@ -148,49 +197,47 @@
       text-align: center;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 9px;
-      letter-spacing: 0.25em;
+      font-size: 10px;
+      letter-spacing: 0.28em;
       text-transform: uppercase;
       pointer-events: none;
       animation: leadEnter 2.6s ease forwards;
       z-index: 999;
-      text-shadow: var(--shadow);
     }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      30%      { transform: translateX(-2px); }
-      60%      { transform: translateX(2px); }
+      30%      { transform: translateX(-3px); }
+      60%      { transform: translateX(3px); }
     }
-    .row.shaking { animation: shake 0.3s ease; }
+    .side.shaking { animation: shake 0.3s ease; }
 
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<div class="chip">
+<div class="tug">
 
-  <!-- ── PLAYER A ── -->
-  <div class="row" data-p="a" id="row-a">
-    <div class="name" id="name-a">MATTEO</div>
-    <div class="alt"><span id="num-a">0</span><small>M</small></div>
-    <div class="bar">
-      <div class="bar__fill" id="fill-a" style="width:0%"></div>
-      <div class="bar__rec" id="rec-a" style="left:0%"></div>
-    </div>
-    <div class="falls" id="falls-a">0</div>
+  <!-- Side A (left) -->
+  <div class="side side--a" id="side-a">
+    <div class="side__alt"><span id="num-a">0</span><small>M</small></div>
+    <div class="side__name" id="name-a">MATTEO</div>
   </div>
 
-  <!-- ── PLAYER B ── -->
-  <div class="row" data-p="b" id="row-b">
-    <div class="name" id="name-b">ABDOU</div>
-    <div class="alt"><span id="num-b">0</span><small>M</small></div>
-    <div class="bar">
-      <div class="bar__fill" id="fill-b" style="width:0%"></div>
-      <div class="bar__rec" id="rec-b" style="left:0%"></div>
+  <!-- Central tug bar -->
+  <div class="center">
+    <div class="tug-bar">
+      <div class="tug__a" id="tug-a" style="width:0%"></div>
+      <div class="tug__b" id="tug-b" style="width:0%"></div>
     </div>
-    <div class="falls" id="falls-b">0</div>
+    <div class="delta" id="delta">— TIED —</div>
+  </div>
+
+  <!-- Side B (right) -->
+  <div class="side side--b" id="side-b">
+    <div class="side__name" id="name-b">ABDOU</div>
+    <div class="side__alt"><span id="num-b">0</span><small>M</small></div>
   </div>
 
 </div>
@@ -198,10 +245,15 @@
 <script>
   const params      = new URLSearchParams(window.location.search);
   const SOLO_PLAYER = params.get('player');
-  const MAX_H       = 1200;
 
-  if (SOLO_PLAYER === 'playerA') el('row-b').classList.add('hidden');
-  else if (SOLO_PLAYER === 'playerB') el('row-a').classList.add('hidden');
+  // Solo mode: hide other side + center (just show one player's altitude)
+  if (SOLO_PLAYER === 'playerA') {
+    document.querySelector('.center').classList.add('hidden');
+    document.querySelector('.side--b').classList.add('hidden');
+  } else if (SOLO_PLAYER === 'playerB') {
+    document.querySelector('.center').classList.add('hidden');
+    document.querySelector('.side--a').classList.add('hidden');
+  }
 
   const socket = io(window.location.origin);
   socket.on('state_sync', applyState);
@@ -215,16 +267,33 @@
     setText('name-b', (b.name || 'Abdou').toUpperCase());
     setText('num-a',  Math.round(a.height));
     setText('num-b',  Math.round(b.height));
-    setText('falls-a', '💀' + a.falls);
-    setText('falls-b', '💀' + b.falls);
 
-    const top   = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
-    const scale = Math.max(top * 1.05, MAX_H * 0.08);
+    // Tug bar logic: the difference determines how much each side fills
+    // Total bar = 100% (50% each side). Whoever leads pushes their side toward 100%.
+    const diff   = a.height - b.height;
+    const total  = Math.max(a.height + b.height, 1);
+    // Normalize the imbalance: leader gets up to 100%, loser down to 0%
+    // Use absolute diff vs total for ratio
+    const ratio  = Math.min(1, Math.abs(diff) / Math.max(total * 0.5, 50));
+    // Each side base = 50%, then leader expands toward 100%, loser shrinks toward 0%
+    let aFill = 50, bFill = 50;
+    if (diff > 0)      { aFill = 50 + ratio * 50; bFill = 50 - ratio * 50; }
+    else if (diff < 0) { bFill = 50 + ratio * 50; aFill = 50 - ratio * 50; }
 
-    el('fill-a').style.width = pct(a.height,    scale) + '%';
-    el('fill-b').style.width = pct(b.height,    scale) + '%';
-    el('rec-a').style.left   = pct(a.maxHeight, scale) + '%';
-    el('rec-b').style.left   = pct(b.maxHeight, scale) + '%';
+    el('tug-a').style.width = aFill.toFixed(2) + '%';
+    el('tug-b').style.width = bFill.toFixed(2) + '%';
+
+    const dEl = el('delta');
+    if (diff === 0) {
+      dEl.textContent = '— TIED —';
+      dEl.className = 'delta';
+    } else if (diff > 0) {
+      dEl.textContent = '◀ +' + Math.round(diff) + 'm';
+      dEl.className = 'delta lead-a';
+    } else {
+      dEl.textContent = '+' + Math.round(-diff) + 'm ▶';
+      dEl.className = 'delta lead-b';
+    }
   }
 
   function flashLead(leader, state) {
@@ -232,7 +301,7 @@
     if (leader === 'tie') return;
     const name  = leader === 'playerA' ? (state.playerA.name || 'Matteo') : (state.playerB.name || 'Abdou');
     const color = leader === 'playerA' ? '#22d3ee' : '#fbbf24';
-    const glow  = leader === 'playerA' ? 'rgba(34,211,238,0.5)' : 'rgba(251,191,36,0.5)';
+    const glow  = leader === 'playerA' ? 'rgba(34,211,238,0.55)' : 'rgba(251,191,36,0.55)';
     const d = document.createElement('div');
     d.className = 'flash';
     d.style.color = color;
@@ -243,14 +312,13 @@
   }
 
   function shakeFall(playerId) {
-    const id = playerId === 'playerA' ? 'row-a' : 'row-b';
+    const id = playerId === 'playerA' ? 'side-a' : 'side-b';
     const n = el(id);
     if (!n) return;
     n.classList.add('shaking');
     setTimeout(() => n.classList.remove('shaking'), 320);
   }
 
-  function pct(v, m)      { return Math.min(100, Math.max(0, (v / m) * 100)).toFixed(2); }
   function el(id)         { return document.getElementById(id); }
   function setText(id, t) { const n = el(id); if (n) n.textContent = t; }
 </script>
