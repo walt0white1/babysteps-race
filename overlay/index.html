@@ -535,6 +535,11 @@
   const TWITCH_A = params.get('twitchA') || 'el_matte0';
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
 
+  // ── Scaling factor: raw save units per displayed metre ──
+  // Adjust via ?scale=50 / ?scale=100 / etc. so 1 step ≈ 1 m.
+  const SCALE = Math.max(1, parseFloat(params.get('scale')) || 100);
+  const toM = (v) => Math.round((v || 0) / SCALE);
+
   // =========================================================================
   // SHOW THE RIGHT LAYOUT
   // =========================================================================
@@ -585,8 +590,8 @@
 
   function applyState(s) {
     const a = s.playerA, b = s.playerB;
-    const aH = Math.round(a.height);
-    const bH = Math.round(b.height);
+    const aH = toM(a.height);
+    const bH = toM(b.height);
 
     // duo
     setText('duo-num-a', aH);
@@ -595,8 +600,8 @@
     // solo
     if (STYLE === 'solo') {
       const p = SOLO_PLAYER === 'playerB' ? b : a;
-      setText('solo-num',  Math.round(p.height));
-      setText('solo-peak', Math.round(p.maxHeight));
+      setText('solo-num',  toM(p.height));
+      setText('solo-peak', toM(p.maxHeight));
       setText('solo-falls', p.falls);
     }
 
@@ -607,8 +612,8 @@
     // banner
     setText('bn-num-a', aH);
     setText('bn-num-b', bH);
-    setText('bn-peak-a', Math.round(a.maxHeight));
-    setText('bn-peak-b', Math.round(b.maxHeight));
+    setText('bn-peak-a', toM(a.maxHeight));
+    setText('bn-peak-b', toM(b.maxHeight));
     setText('bn-falls-a', a.falls);
     setText('bn-falls-b', b.falls);
 
