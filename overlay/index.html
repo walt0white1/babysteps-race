@@ -10,19 +10,19 @@
 
   <style>
     /* =========================================================================
-       BABY STEPS — minimal floating altimeter
-       No card. Just the gauge + text floating, with text-shadows for legibility.
+       BABY STEPS — Pill-bar altimeter
+       Bar = container. Number inside top. Rotated label on right.
        ========================================================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --a:      #67e8f9;
+      --a:      #22d3ee;
       --a-deep: #155e75;
-      --a-glow: rgba(103, 232, 249, 0.55);
+      --a-glow: rgba(34, 211, 238, 0.6);
 
       --b:      #fbbf24;
       --b-deep: #78350f;
-      --b-glow: rgba(251, 191, 36, 0.55);
+      --b-glow: rgba(251, 191, 36, 0.6);
 
       --shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.7);
     }
@@ -39,21 +39,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0;
-      gap: 36px;
+      gap: 60px;
       min-height: 100vh;
+      padding: 20px;
     }
 
-    /* ========== ONE PLAYER ========== */
+    /* ========== PLAYER ========== */
     .player {
       --c:      var(--a);
       --c-deep: var(--a-deep);
       --c-glow: var(--a-glow);
 
       display: flex;
-      gap: 14px;
-      align-items: stretch;
-      height: 440px;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
     .player[data-p="b"] {
       --c:      var(--b);
@@ -61,241 +61,179 @@
       --c-glow: var(--b-glow);
     }
 
-    /* ===== Gauge ===== */
-    .gauge {
-      width: 38px;
-      height: 100%;
+    /* Name above the bar */
+    .p-name {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: 22px;
+      color: var(--c);
+      text-shadow: var(--shadow);
+      font-variation-settings: "opsz" 144;
+      letter-spacing: -0.005em;
+      line-height: 1;
+    }
+
+    /* Bar + label container */
+    .stack {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    /* ========== THE BAR (= the visual hero) ========== */
+    .bar {
+      width: 84px;
+      height: 380px;
+      border-radius: 42px;
       position: relative;
+      overflow: hidden;
       background:
-        linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.4));
-      border-radius: 19px;
+        linear-gradient(180deg, #14181f 0%, #0a0d12 100%);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.08),
-        inset 0 -1px 0 rgba(0,0,0,0.4),
-        inset 0 0 0 1px rgba(255,255,255,0.06),
-        0 4px 16px rgba(0,0,0,0.5),
-        0 2px 4px rgba(0,0,0,0.4);
-      overflow: visible;
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        inset 0 0 0 1px rgba(255,255,255,0.05),
+        0 8px 24px rgba(0,0,0,0.6),
+        0 2px 6px rgba(0,0,0,0.4);
     }
 
-    .gauge__track {
+    /* The fill that rises */
+    .bar__fill {
       position: absolute;
-      inset: 0;
-      border-radius: 19px;
-      overflow: hidden;
-    }
-
-    /* Subtle inner shadow at top of track (depth) */
-    .gauge__track::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(120% 30% at 50% 0%, rgba(0,0,0,0.4) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 4;
-    }
-
-    .gauge__fill {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
+      left: 4px; right: 4px; bottom: 4px;
       height: 0%;
-      border-radius: 19px;
+      border-radius: 38px;
       background:
         linear-gradient(180deg,
-          color-mix(in srgb, var(--c) 110%, white 10%) 0%,
-          var(--c) 8%,
-          color-mix(in srgb, var(--c) 80%, var(--c-deep)) 35%,
-          color-mix(in srgb, var(--c) 50%, var(--c-deep)) 65%,
+          color-mix(in srgb, var(--c) 110%, white 12%) 0%,
+          var(--c) 12%,
+          color-mix(in srgb, var(--c) 75%, var(--c-deep)) 45%,
           var(--c-deep) 100%);
       transition: height 0.85s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.4),
-        inset 1px 0 0 rgba(255,255,255,0.15),
-        inset -1px 0 0 rgba(0,0,0,0.2);
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 -6px 20px var(--c-glow),
+        0 -2px 8px var(--c-glow);
     }
 
-    /* Vertical glass highlight on the fill */
-    .gauge__fill > .shine {
+    /* Vertical glass highlight on fill */
+    .bar__fill::before {
+      content: '';
       position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 4px;
-      width: 6px;
+      top: 6px; bottom: 6px;
+      left: 10px;
+      width: 10px;
       background: linear-gradient(180deg,
-        rgba(255,255,255,0.35) 0%,
+        rgba(255,255,255,0.45) 0%,
         rgba(255,255,255,0.05) 100%);
-      border-radius: 3px;
+      border-radius: 5px;
       pointer-events: none;
     }
 
-    /* Meniscus glow - large diffuse halo */
-    .gauge__fill::before {
+    /* Bright meniscus line at top of fill */
+    .bar__fill::after {
       content: '';
       position: absolute;
-      top: -16px; left: -120%; right: -120%;
-      height: 32px;
-      background: radial-gradient(ellipse at center,
-        color-mix(in srgb, var(--c) 110%, white 10%) 0%,
-        var(--c) 15%,
-        var(--c-glow) 45%,
-        transparent 75%);
-      filter: blur(5px);
-      animation: pulse 2.8s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 5;
-    }
-    /* Bright crisp meniscus line */
-    .gauge__fill::after {
-      content: '';
-      position: absolute;
-      top: -1.5px; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(180deg,
-        rgba(255,255,255,0.9) 0%,
-        var(--c) 100%);
+      top: -1px; left: 0; right: 0;
+      height: 2px;
+      background: rgba(255,255,255,0.9);
+      box-shadow:
+        0 0 10px var(--c),
+        0 0 20px var(--c-glow);
       border-radius: 2px;
-      box-shadow:
-        0 0 8px var(--c),
-        0 0 16px var(--c-glow),
-        0 0 24px var(--c-glow);
-      z-index: 6;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.85; }
-      50%      { opacity: 1; }
     }
 
-    /* Record marker - hairline + chevron */
-    .gauge__rec {
+    /* Record marker (white horizontal line) */
+    .bar__rec {
       position: absolute;
-      left: -5px; right: -5px;
+      left: 0; right: 0;
       height: 1.5px;
-      background: rgba(255,255,255,0.85);
-      box-shadow:
-        0 0 6px rgba(255,255,255,0.7),
-        0 0 12px rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.55);
+      box-shadow: 0 0 4px rgba(255,255,255,0.4);
       transition: bottom 0.55s ease;
       z-index: 3;
       pointer-events: none;
     }
-    .gauge__rec::before {
+    .bar__rec::before {
       content: '';
       position: absolute;
-      left: -6px; top: -3.5px;
+      left: -3px; top: -3.5px;
       width: 0; height: 0;
-      border-top: 4.5px solid transparent;
-      border-bottom: 4.5px solid transparent;
-      border-left: 6px solid #fff;
-      filter: drop-shadow(0 0 3px rgba(255,255,255,0.6));
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 5px solid rgba(255,255,255,0.8);
     }
 
-    /* ===== Text column ===== */
-    .info {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: flex-start;
-      min-width: 140px;
-      padding: 4px 0;
+    /* CURRENT ALTITUDE — inside top of bar */
+    .bar__readout {
+      position: absolute;
+      top: 16px; left: 0; right: 0;
+      text-align: center;
+      z-index: 5;
+      pointer-events: none;
     }
-
-    .info__top {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    /* NAME — strong editorial italic */
-    .info__name {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 600;
-      font-size: 26px;
-      letter-spacing: -0.005em;
-      color: var(--c);
-      text-shadow:
-        0 1px 2px rgba(0,0,0,0.95),
-        0 0 12px rgba(0,0,0,0.7),
-        0 0 24px color-mix(in srgb, var(--c) 30%, transparent);
-      font-variation-settings: "opsz" 144;
-      white-space: nowrap;
-      line-height: 1;
-    }
-
-    /* ALTITUDE — the hero number, dominant */
-    .info__num {
+    .bar__num {
       font-family: 'Antonio', sans-serif;
       font-weight: 400;
-      font-size: 104px;
-      line-height: 0.8;
+      font-size: 40px;
+      line-height: 0.9;
       color: #fff;
-      letter-spacing: -0.035em;
+      letter-spacing: -0.03em;
       font-variant-numeric: tabular-nums;
       text-shadow:
-        0 2px 4px rgba(0,0,0,0.95),
-        0 0 18px rgba(0,0,0,0.8),
-        0 0 32px color-mix(in srgb, var(--c) 22%, transparent);
-      margin-top: 6px;
+        0 1px 4px rgba(0,0,0,0.9),
+        0 0 12px rgba(0,0,0,0.6);
     }
-    .info__num--small { font-size: 80px; }
-
-    /* METRES label — tracked, present */
-    .info__unit {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.42em;
-      color: rgba(255,255,255,0.65);
-      text-shadow: var(--shadow);
-      margin-top: 6px;
-      padding-left: 2px;
-    }
-
-    /* PEAK + FALLS — secondary, but readable */
-    .info__bot {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .bar__num--small { font-size: 30px; }
+    .bar__sub {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
       font-weight: 500;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.55);
+      margin-top: 4px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    }
+
+    /* ========== ROTATED LABEL on right side of bar ========== */
+    .label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 17px;
+      letter-spacing: 0.35em;
+      color: #fff;
+      text-shadow: var(--shadow);
+      text-transform: uppercase;
+      align-self: center;
+      white-space: nowrap;
+    }
+
+    /* Falls below */
+    .p-falls {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-    }
-    .info__peak {
       color: rgba(255,255,255,0.55);
       text-shadow: var(--shadow);
       display: flex;
       align-items: baseline;
       gap: 6px;
     }
-    .info__peak strong {
+    .p-falls strong {
       font-family: 'Antonio', sans-serif;
       font-weight: 500;
-      font-size: 22px;
-      color: var(--c);
-      letter-spacing: -0.02em;
-      text-shadow:
-        var(--shadow),
-        0 0 12px color-mix(in srgb, var(--c) 40%, transparent);
-    }
-    .info__falls {
-      color: rgba(255,255,255,0.4);
-      text-shadow: var(--shadow);
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-    .info__falls strong {
-      font-family: 'Antonio', sans-serif;
-      font-weight: 500;
-      font-size: 20px;
-      color: rgba(255,255,255,0.85);
+      font-size: 18px;
+      color: #fff;
       letter-spacing: -0.02em;
     }
 
-    /* ===== Animations ===== */
+    /* ========== ANIMATIONS ========== */
     @keyframes leadEnter {
       0%   { opacity: 0; transform: translateY(-8px); }
       18%  { opacity: 1; transform: translateY(0); }
@@ -304,12 +242,12 @@
     }
     .lead-flash {
       position: fixed;
-      top: 4px; left: 0; right: 0;
+      top: 12px; left: 0; right: 0;
       text-align: center;
       font-family: 'Fraunces', serif;
       font-style: italic;
       font-weight: 400;
-      font-size: 11px;
+      font-size: 13px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       pointer-events: none;
@@ -319,10 +257,10 @@
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      20%      { transform: translateX(-2px); }
-      40%      { transform: translateX(2px); }
-      60%      { transform: translateX(-1px); }
-      80%      { transform: translateX(1px); }
+      20%      { transform: translateX(-3px); }
+      40%      { transform: translateX(3px); }
+      60%      { transform: translateX(-2px); }
+      80%      { transform: translateX(2px); }
     }
     .player.shaking { animation: shake 0.4s ease; }
 
@@ -333,44 +271,36 @@
 
   <!-- ── PLAYER A ── -->
   <div class="player" data-p="a" id="p-a">
-    <div class="gauge">
-      <div class="gauge__track">
-        <div class="gauge__fill" id="fill-a" style="height:0%"><div class="shine"></div></div>
+    <div class="p-name" id="name-a">Matteo</div>
+    <div class="stack">
+      <div class="bar">
+        <div class="bar__fill" id="fill-a" style="height:0%"></div>
+        <div class="bar__rec" id="rec-a" style="bottom:0%"></div>
+        <div class="bar__readout">
+          <div class="bar__num" id="num-a">0</div>
+          <div class="bar__sub">/<span id="peak-a">0</span> peak</div>
+        </div>
       </div>
-      <div class="gauge__rec" id="rec-a" style="bottom:0%"></div>
+      <div class="label">Baby Steps</div>
     </div>
-    <div class="info">
-      <div class="info__top">
-        <div class="info__name" id="name-a">Matteo</div>
-        <div class="info__num" id="num-a">0</div>
-        <div class="info__unit">METRES</div>
-      </div>
-      <div class="info__bot">
-        <div class="info__peak"><strong id="peak-a">0</strong>peak</div>
-        <div class="info__falls"><strong id="falls-a">00</strong>falls</div>
-      </div>
-    </div>
+    <div class="p-falls"><strong id="falls-a">0</strong>falls</div>
   </div>
 
   <!-- ── PLAYER B ── -->
   <div class="player" data-p="b" id="p-b">
-    <div class="gauge">
-      <div class="gauge__track">
-        <div class="gauge__fill" id="fill-b" style="height:0%"><div class="shine"></div></div>
+    <div class="p-name" id="name-b">Abdou</div>
+    <div class="stack">
+      <div class="bar">
+        <div class="bar__fill" id="fill-b" style="height:0%"></div>
+        <div class="bar__rec" id="rec-b" style="bottom:0%"></div>
+        <div class="bar__readout">
+          <div class="bar__num" id="num-b">0</div>
+          <div class="bar__sub">/<span id="peak-b">0</span> peak</div>
+        </div>
       </div>
-      <div class="gauge__rec" id="rec-b" style="bottom:0%"></div>
+      <div class="label">Baby Steps</div>
     </div>
-    <div class="info">
-      <div class="info__top">
-        <div class="info__name" id="name-b">Abdou</div>
-        <div class="info__num" id="num-b">0</div>
-        <div class="info__unit">METRES</div>
-      </div>
-      <div class="info__bot">
-        <div class="info__peak"><strong id="peak-b">0</strong>peak</div>
-        <div class="info__falls"><strong id="falls-b">00</strong>falls</div>
-      </div>
-    </div>
+    <div class="p-falls"><strong id="falls-b">0</strong>falls</div>
   </div>
 
 <script>
@@ -396,8 +326,8 @@
     setNum('num-b', b.height);
     setText('peak-a', Math.round(a.maxHeight));
     setText('peak-b', Math.round(b.maxHeight));
-    setText('falls-a', String(a.falls).padStart(2, '0'));
-    setText('falls-b', String(b.falls).padStart(2, '0'));
+    setText('falls-a', String(a.falls));
+    setText('falls-b', String(b.falls));
 
     const top   = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
     const scale = Math.max(top * 1.05, MAX_H * 0.08);
@@ -412,8 +342,8 @@
     if (SOLO_PLAYER && SOLO_PLAYER !== leader) return;
     if (leader === 'tie') return;
     const name  = leader === 'playerA' ? (state.playerA.name || 'Matteo') : (state.playerB.name || 'Abdou');
-    const color = leader === 'playerA' ? '#67e8f9' : '#fbbf24';
-    const glow  = leader === 'playerA' ? 'rgba(103,232,249,0.55)' : 'rgba(251,191,36,0.55)';
+    const color = leader === 'playerA' ? '#22d3ee' : '#fbbf24';
+    const glow  = leader === 'playerA' ? 'rgba(34,211,238,0.6)' : 'rgba(251,191,36,0.6)';
     const d = document.createElement('div');
     d.className = 'lead-flash';
     d.style.color = color;
@@ -438,7 +368,7 @@
     const n = el(id); if (!n) return;
     const r = Math.round(v);
     n.textContent = r;
-    n.classList.toggle('info__num--small', String(r).length >= 4);
+    n.classList.toggle('bar__num--small', String(r).length >= 4);
   }
 </script>
 </body>
