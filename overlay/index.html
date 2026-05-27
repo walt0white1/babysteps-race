@@ -43,8 +43,8 @@
     /* ========== SCENE ========== */
     .scene {
       position: relative;
-      width: 540px;
-      height: 480px;
+      width: 280px;
+      height: 240px;
     }
 
     /* Mountain SVG fills the scene */
@@ -88,8 +88,8 @@
 
     /* Glowing dot — the climber */
     .climber__dot {
-      width: 16px;
-      height: 16px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%,
         rgba(255,255,255,0.95) 0%,
@@ -141,14 +141,14 @@
       z-index: 6;
       transition: bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .label[data-side="left"]  { right: calc(100% + 14px); text-align: right; }
-    .label[data-side="right"] { left:  calc(100% + 14px); text-align: left;  }
+    .label[data-side="left"]  { right: calc(100% + 8px); text-align: right; }
+    .label[data-side="right"] { left:  calc(100% + 8px); text-align: left;  }
 
     .label__line {
       position: absolute;
       top: 50%;
       height: 1px;
-      width: 12px;
+      width: 6px;
       background: linear-gradient(90deg, var(--c-glow), transparent);
       transition: background 0.4s;
     }
@@ -161,12 +161,12 @@
       font-family: 'Fraunces', serif;
       font-style: italic;
       font-weight: 600;
-      font-size: 18px;
+      font-size: 12px;
       letter-spacing: -0.005em;
       text-shadow: var(--shadow);
       font-variation-settings: "opsz" 144;
       line-height: 1;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .climber[data-p="a"] .label__name { color: var(--a); }
     .climber[data-p="b"] .label__name { color: var(--b); }
@@ -174,7 +174,7 @@
     .label__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 44px;
+      font-size: 26px;
       line-height: 0.85;
       letter-spacing: -0.03em;
       color: #fff;
@@ -183,28 +183,28 @@
     }
     .label__alt small {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 8px;
       font-weight: 600;
       letter-spacing: 0.18em;
       color: rgba(255,255,255,0.65);
-      margin-left: 4px;
+      margin-left: 2px;
     }
 
     .label__meta {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
+      font-size: 7px;
       font-weight: 500;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: rgba(255,255,255,0.55);
       text-shadow: var(--shadow);
-      margin-top: 6px;
+      margin-top: 3px;
       white-space: nowrap;
     }
     .label__meta strong {
       color: #fff;
       font-weight: 700;
-      margin-right: 2px;
+      margin-right: 1px;
     }
 
     /* Peak marker (record altitude) — small horizontal tick on the mountain */
@@ -212,7 +212,7 @@
       position: absolute;
       left: 50%;
       transform: translate(-50%, 50%);
-      width: 24px;
+      width: 14px;
       height: 1px;
       background: rgba(255,255,255,0.5);
       transition: bottom 0.6s ease;
@@ -223,9 +223,9 @@
       content: '';
       position: absolute;
       left: 50%;
-      top: -3px;
+      top: -2.5px;
       transform: translateX(-50%);
-      width: 4px; height: 4px;
+      width: 3px; height: 3px;
       background: rgba(255,255,255,0.85);
       border-radius: 50%;
       box-shadow: 0 0 4px rgba(255,255,255,0.6);
@@ -239,9 +239,9 @@
       top: 0; left: 0; right: 0;
       text-align: center;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
+      font-size: 7px;
       font-weight: 600;
-      letter-spacing: 0.4em;
+      letter-spacing: 0.35em;
       color: rgba(255,255,255,0.45);
       text-shadow: var(--shadow);
       text-transform: uppercase;
@@ -473,9 +473,9 @@
     el('peak-marker-a').style.bottom = pctScene(a.maxHeight, scale) + '%';
     el('peak-marker-b').style.bottom = pctScene(b.maxHeight, scale) + '%';
 
-    // Trail height = how high the climber has come from the base
-    el('trail-a').style.height = (yA * 4.6) + 'px';
-    el('trail-b').style.height = (yB * 4.6) + 'px';
+    // Trail height = how high the climber has come from the base (scene height ~240px)
+    el('trail-a').style.height = (yA * 2.3) + 'px';
+    el('trail-b').style.height = (yB * 2.3) + 'px';
   }
 
   function pctScene(v, m) {
