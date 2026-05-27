@@ -29,6 +29,13 @@
       overflow: hidden;
       color: #fff;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: geometricPrecision;
+    }
+
+    img {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: high-quality;
     }
 
     body {
@@ -36,8 +43,8 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 14px;
-      gap: 30px;
+      padding: 20px;
+      gap: 44px;
       font-family: 'JetBrains Mono', monospace;
     }
 
@@ -48,7 +55,7 @@
 
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 20px;
     }
     .player[data-p="b"] {
       --c:      var(--b);
@@ -57,15 +64,15 @@
 
     /* ===== Avatar ===== */
     .avatar {
-      width: 62px;
-      height: 62px;
+      width: 110px;
+      height: 110px;
       border-radius: 50%;
       position: relative;
       flex-shrink: 0;
       background: rgba(0,0,0,0.4);
       box-shadow:
-        0 4px 14px rgba(0,0,0,0.7),
-        0 1px 3px rgba(0,0,0,0.5);
+        0 6px 22px rgba(0,0,0,0.75),
+        0 2px 6px rgba(0,0,0,0.55);
     }
     .avatar img {
       width: 100%;
@@ -83,9 +90,9 @@
       justify-content: center;
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 30px;
+      font-size: 54px;
       color: var(--c);
-      text-shadow: 0 0 8px var(--c-glow);
+      text-shadow: 0 0 12px var(--c-glow);
       pointer-events: none;
     }
     .avatar.loaded .avatar__initial { display: none; }
@@ -100,32 +107,32 @@
     .info__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 48px;
+      font-size: 84px;
       line-height: 0.85;
       color: #fff;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.035em;
       font-variant-numeric: tabular-nums;
       text-shadow: var(--shadow);
     }
     .info__alt small {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 28px;
+      font-size: 48px;
       font-weight: 700;
       letter-spacing: -0.02em;
       color: var(--c);
-      margin-left: 3px;
-      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
+      margin-left: 4px;
+      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
       line-height: 0.85;
     }
     .info__name {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 22px;
+      font-size: 36px;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: rgba(255,255,255,0.92);
       text-shadow: var(--shadow);
       line-height: 1;
-      margin-top: 4px;
+      margin-top: 6px;
       text-transform: lowercase;
     }
 
@@ -210,7 +217,10 @@
       .then(r => r.text())
       .then(url => {
         if (url && url.startsWith('http')) {
-          document.getElementById(imgId).src = url;
+          // Upgrade Twitch avatar to 600x600 for HiDPI/4K
+          // URL format: ...-profile_image-300x300.png  =>  ...-profile_image-600x600.png
+          const hiRes = url.replace(/-\d+x\d+(\.\w+)$/, '-600x600$1');
+          document.getElementById(imgId).src = hiRes;
         }
       })
       .catch(() => {});
