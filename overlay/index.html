@@ -536,8 +536,8 @@
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
 
   // ── Scaling factor: raw save units per displayed metre ──
-  // 80 = compteur reactif, ~1-2m par mouvement notable. Override via ?scale=X
-  const SCALE = Math.max(1, parseFloat(params.get('scale')) || 80);
+  // 40 = compteur bien reactif, chiffres qui montent visiblement. Override via ?scale=X
+  const SCALE = Math.max(1, parseFloat(params.get('scale')) || 40);
   const toM = (v) => Math.round((v || 0) / SCALE);
 
   // =========================================================================
