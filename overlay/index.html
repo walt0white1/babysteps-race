@@ -5,257 +5,174 @@
   <title>Baby Steps — Overlay</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@500;700;900&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    :root {
-      --a:       #60a5fa;
-      --a-dark:  #1e3a5f;
-      --b:       #fb923c;
-      --b-dark:  #5c1f00;
-      --bg:      rgba(6, 12, 22, 0.91);
-      --border:  rgba(148, 193, 255, 0.12);
-      --glow-a:  rgba(96, 165, 250, 0.25);
-      --glow-b:  rgba(251, 146, 60, 0.25);
-      --snow:    #e8f0fe;
-      --mist:    #7a9ab8;
-      --gold:    #fbbf24;
-      --text:    #dce8f5;
-    }
-
     body {
       background: transparent;
-      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-family: 'Inter', sans-serif;
       width: 480px;
-      padding: 14px;
+      padding: 12px 14px;
       overflow: hidden;
     }
 
-    /* ── Card principale ────────────────────────────────────────────────────── */
-    .overlay-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 18px 14px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow:
-        0 0 0 1px rgba(148,193,255,0.06),
-        0 12px 40px rgba(0,0,0,0.7),
-        inset 0 1px 0 rgba(255,255,255,0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Silhouette montagne decorative en fond */
-    .overlay-card::before {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 70px;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 70' preserveAspectRatio='none'%3E%3Cpath d='M0,70 L0,45 L40,20 L80,40 L130,5 L180,35 L220,15 L260,38 L310,8 L355,32 L400,12 L440,30 L480,18 L480,70 Z' fill='rgba(20,40,80,0.35)'/%3E%3Cpath d='M0,70 L0,55 L60,38 L100,50 L150,28 L200,48 L250,30 L300,50 L350,22 L390,44 L440,25 L480,40 L480,70 Z' fill='rgba(10,20,45,0.5)'/%3E%3C/svg%3E") no-repeat bottom center / cover;
-      pointer-events: none;
-      opacity: 0.8;
-    }
-
-    /* ── Header ────────────────────────────────────────────────────────────── */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      z-index: 1;
-    }
-
-    .race-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.05rem;
-      letter-spacing: 0.18em;
-      color: var(--mist);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .race-title .peak-icon { font-size: 1rem; filter: drop-shadow(0 0 4px rgba(96,165,250,0.6)); }
-
-    .leader-badge {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      padding: 3px 12px;
-      border-radius: 20px;
-      transition: all 0.4s;
-    }
-    .leader-badge.a   { background: var(--a); color: #000; box-shadow: 0 0 10px var(--glow-a); }
-    .leader-badge.b   { background: var(--b); color: #000; box-shadow: 0 0 10px var(--glow-b); }
-    .leader-badge.tie { background: rgba(251,191,36,0.2); color: var(--gold); border: 1px solid rgba(251,191,36,0.4); }
-
-    /* ── Joueurs ────────────────────────────────────────────────────────────── */
-    .players {
+    /* ── Wrapper global ────────────────────────────────────────────────── */
+    .overlay {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      position: relative;
-      z-index: 1;
     }
 
-    .player-row {
+    /* ── Chaque joueur ──────────────────────────────────────────────────── */
+    .player-block {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .player-info { width: 108px; flex-shrink: 0; }
+    /* Ligne nom + hauteur */
+    .player-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
 
     .player-name {
-      font-size: 0.82rem;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 0.12em;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    .player-alt {
+    .player-height {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.5rem;
+      letter-spacing: 0.06em;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 0 24px rgba(0,0,0,0.7);
       line-height: 1;
-      letter-spacing: 0.04em;
     }
-    .player-alt span {
+    .player-height span {
       font-family: 'Inter', sans-serif;
       font-size: 0.6rem;
       font-weight: 600;
       letter-spacing: 0.1em;
-      color: var(--mist);
-      text-transform: uppercase;
+      opacity: 0.7;
       margin-left: 1px;
-      vertical-align: middle;
     }
 
-    .player-record {
-      font-size: 0.65rem;
-      color: var(--mist);
-      letter-spacing: 0.04em;
-      margin-top: 1px;
+    /* Sous-info : record + chutes */
+    .player-sub {
+      font-size: 0.67rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      opacity: 0.75;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+      text-transform: uppercase;
     }
-    .player-record .rec-val { color: rgba(255,255,255,0.55); font-weight: 600; }
 
-    /* ── Barre d'altitude ───────────────────────────────────────────────────── */
+    /* ── Barre de progression ───────────────────────────────────────────── */
     .bar-wrap {
-      flex: 1;
-      height: 26px;
-      background: rgba(255,255,255,0.04);
-      border-radius: 13px;
+      height: 10px;
+      background: rgba(0,0,0,0.28);
+      border-radius: 5px;
       position: relative;
-      border: 1px solid rgba(255,255,255,0.06);
-      overflow: hidden;
+      overflow: visible;
     }
-    .solo .bar-wrap { height: 36px; border-radius: 18px; }
-    .solo .player-alt { font-size: 2rem; }
 
     .bar-fill {
       height: 100%;
-      border-radius: 13px;
+      border-radius: 5px;
       min-width: 0;
       transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
     }
+    /* Reflet brillant sur la barre */
     .bar-fill::after {
       content: '';
       position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
-      border-radius: inherit;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: rgba(255,255,255,0.22);
+      border-radius: 5px 5px 0 0;
       pointer-events: none;
     }
 
-    /* Gradient glacier pour A */
+    /* Player A — glacier */
     .bar-a {
-      background: linear-gradient(90deg,
-        #0f3460 0%,
-        #1a5fa8 40%,
-        #60a5fa 80%,
-        #bfdbfe 100%
-      );
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+      background: linear-gradient(90deg, #1e4f9a 0%, #3b82f6 60%, #93c5fd 100%);
+      box-shadow: 0 0 10px rgba(59,130,246,0.6), 0 2px 8px rgba(0,0,0,0.5);
     }
-    /* Gradient volcan/coucher de soleil pour B */
+    /* Player B — volcan */
     .bar-b {
-      background: linear-gradient(90deg,
-        #3b0a00 0%,
-        #9a2f00 40%,
-        #fb923c 80%,
-        #fde68a 100%
-      );
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+      background: linear-gradient(90deg, #92400e 0%, #f97316 60%, #fcd34d 100%);
+      box-shadow: 0 0 10px rgba(249,115,22,0.6), 0 2px 8px rgba(0,0,0,0.5);
     }
 
-    /* Marqueur record = drapeau au sommet */
+    /* Marqueur record */
     .bar-record {
       position: absolute;
-      top: 0; bottom: 0;
+      top: -3px; bottom: -3px;
       width: 2px;
       background: rgba(255,255,255,0.9);
-      box-shadow: 0 0 5px rgba(255,255,255,0.7), 0 0 12px rgba(255,255,255,0.3);
+      border-radius: 1px;
+      box-shadow: 0 0 6px rgba(255,255,255,0.8);
       transition: left 0.4s ease;
       pointer-events: none;
     }
-    /* Petit drapeau en haut du marqueur */
-    .bar-record::before {
-      content: '⛳';
-      position: absolute;
-      top: -18px;
-      left: -4px;
-      font-size: 12px;
-      line-height: 1;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
-    }
 
-    /* ── Diff row ───────────────────────────────────────────────────────────── */
-    .diff-row {
+    /* ── Séparateur entre les deux joueurs ─────────────────────────────── */
+    .diff-strip {
       display: flex;
       align-items: center;
-      gap: 10px;
-      position: relative;
-      z-index: 1;
+      gap: 8px;
+      padding: 0 2px;
     }
     .diff-line {
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      background: rgba(255,255,255,0.15);
     }
-    .diff-badge {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--mist);
+    .diff-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.6);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
       white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      transition: color 0.3s;
     }
-    .diff-badge.leading-a { color: var(--a); text-shadow: 0 0 8px var(--glow-a); }
-    .diff-badge.leading-b { color: var(--b); text-shadow: 0 0 8px var(--glow-b); }
+    .diff-text.lead-a { color: #93c5fd; }
+    .diff-text.lead-b { color: #fcd34d; }
 
-    /* ── Animations ─────────────────────────────────────────────────────────── */
+    /* ── Dots ───────────────────────────────────────────────────────────── */
+    .dot {
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-bottom: 1px;
+    }
+    .dot.on  { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+    .dot.off { background: #ef4444; }
+
+    /* ── Animations ─────────────────────────────────────────────────────── */
     @keyframes leadFlash {
-      0%   { opacity: 0; transform: scale(0.8) translateY(-6px); }
-      15%  { opacity: 1; transform: scale(1.08) translateY(0); }
-      75%  { opacity: 1; }
-      100% { opacity: 0; transform: translateY(-8px); }
+      0%   { opacity:0; transform:scale(0.8) translateY(-6px); }
+      15%  { opacity:1; transform:scale(1.06) translateY(0); }
+      75%  { opacity:1; }
+      100% { opacity:0; transform:translateY(-10px); }
     }
     .lead-change-anim {
       position: fixed;
       top: 0; left: 0; right: 0;
       text-align: center;
-      padding: 10px;
+      padding: 8px;
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       letter-spacing: 0.2em;
       animation: leadFlash 3s ease forwards;
       pointer-events: none;
@@ -263,34 +180,20 @@
     }
 
     @keyframes fallBounce {
-      0%   { opacity: 0; transform: translateY(-24px) scale(1.3); }
-      25%  { opacity: 1; transform: translateY(0) scale(1); }
-      70%  { opacity: 1; }
-      100% { opacity: 0; transform: translateY(8px); }
+      0%   { opacity:0; transform:translateY(-20px) scale(1.2); }
+      20%  { opacity:1; transform:translateY(0) scale(1); }
+      70%  { opacity:1; }
+      100% { opacity:0; }
     }
     .fall-anim {
       position: fixed;
-      font-size: 1.3rem;
-      font-weight: 900;
       font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
       letter-spacing: 0.1em;
       animation: fallBounce 2.2s ease forwards;
       pointer-events: none;
       z-index: 998;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.9);
-    }
-
-    /* ── Dots online ────────────────────────────────────────────────────────── */
-    .offline-dot {
-      display: inline-block; width: 5px; height: 5px;
-      border-radius: 50%; background: #ef4444;
-      margin-left: 4px; vertical-align: middle;
-    }
-    .online-dot {
-      display: inline-block; width: 5px; height: 5px;
-      border-radius: 50%; background: #22c55e;
-      margin-left: 4px; vertical-align: middle;
-      box-shadow: 0 0 4px #22c55e;
+      text-shadow: 0 2px 12px rgba(0,0,0,1);
     }
 
     .hidden { display: none !important; }
@@ -298,50 +201,45 @@
 </head>
 <body>
 
-<div class="overlay-card" id="card">
+<div class="overlay" id="overlay">
 
-  <div class="header">
-    <div class="race-title">
-      <span class="peak-icon">⛰️</span>
-      <span id="race-title">ALTITUDE RACE</span>
+  <!-- Player A -->
+  <div class="player-block" id="row-a">
+    <div class="player-top">
+      <div class="player-name" id="name-a" style="color:#93c5fd">
+        Player A
+        <span class="dot off" id="dot-a"></span>
+      </div>
+      <div class="player-height" id="height-a" style="color:#93c5fd">0<span>m</span></div>
     </div>
-    <div class="leader-badge tie" id="leader-badge">EGALITE</div>
+    <div class="bar-wrap">
+      <div class="bar-fill bar-a" id="bar-a" style="width:0%"></div>
+      <div class="bar-record" id="record-a" style="left:0%"></div>
+    </div>
+    <div class="player-sub" id="sub-a" style="color:#93c5fd">Record 0m &nbsp;·&nbsp; 💀 0 chute</div>
   </div>
 
-  <div class="players">
-
-    <!-- Player A -->
-    <div class="player-row" id="row-a">
-      <div class="player-info">
-        <div class="player-name" id="name-a" style="color:var(--a)">Player A</div>
-        <div class="player-alt" id="height-a" style="color:var(--a)">0<span>m</span></div>
-        <div class="player-record" id="record-label-a">Record <span class="rec-val" id="maxh-a">0m</span> &nbsp;💀 <span id="falls-a">0</span></div>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-fill bar-a" id="bar-a" style="width:0%"></div>
-        <div class="bar-record" id="record-a" style="left:0%"></div>
-      </div>
-    </div>
-
-    <!-- Player B -->
-    <div class="player-row" id="row-b">
-      <div class="player-info">
-        <div class="player-name" id="name-b" style="color:var(--b)">Player B</div>
-        <div class="player-alt" id="height-b" style="color:var(--b)">0<span>m</span></div>
-        <div class="player-record" id="record-label-b">Record <span class="rec-val" id="maxh-b">0m</span> &nbsp;💀 <span id="falls-b">0</span></div>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-fill bar-b" id="bar-b" style="width:0%"></div>
-        <div class="bar-record" id="record-b" style="left:0%"></div>
-      </div>
-    </div>
-
+  <!-- Séparateur diff (mode double) -->
+  <div class="diff-strip" id="diff-row">
+    <div class="diff-line"></div>
+    <div class="diff-text" id="diff-text">ECART : 0M</div>
+    <div class="diff-line"></div>
   </div>
 
-  <div class="diff-row" id="diff-row">
-    <div class="diff-line"></div>
-    <div class="diff-badge" id="diff-badge">ECART : 0m</div>
-    <div class="diff-line"></div>
+  <!-- Player B -->
+  <div class="player-block" id="row-b">
+    <div class="player-top">
+      <div class="player-name" id="name-b" style="color:#fcd34d">
+        Player B
+        <span class="dot off" id="dot-b"></span>
+      </div>
+      <div class="player-height" id="height-b" style="color:#fcd34d">0<span>m</span></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-fill bar-b" id="bar-b" style="width:0%"></div>
+      <div class="bar-record" id="record-b" style="left:0%"></div>
+    </div>
+    <div class="player-sub" id="sub-b" style="color:#fcd34d">Record 0m &nbsp;·&nbsp; 💀 0 chute</div>
   </div>
 
 </div>
@@ -355,13 +253,9 @@
   if (SOLO_PLAYER === 'playerA') {
     el('row-b').classList.add('hidden');
     el('diff-row').classList.add('hidden');
-    el('card').classList.add('solo');
-    el('race-title').textContent = 'MA PROGRESSION';
   } else if (SOLO_PLAYER === 'playerB') {
     el('row-a').classList.add('hidden');
     el('diff-row').classList.add('hidden');
-    el('card').classList.add('solo');
-    el('race-title').textContent = 'MA PROGRESSION';
   }
 
   const socket = io(SERVER);
@@ -374,67 +268,51 @@
   function applyState(s) {
     const a = s.playerA, b = s.playerB;
 
-    el('name-a').innerHTML   = a.name + dot(a.online);
-    el('name-b').innerHTML   = b.name + dot(b.online);
+    // Noms
+    el('name-a').childNodes[0].textContent = a.name + ' ';
+    el('name-b').childNodes[0].textContent = b.name + ' ';
+    el('dot-a').className = 'dot ' + (a.online ? 'on' : 'off');
+    el('dot-b').className = 'dot ' + (b.online ? 'on' : 'off');
+
+    // Hauteurs
     el('height-a').innerHTML = Math.round(a.height) + '<span>m</span>';
     el('height-b').innerHTML = Math.round(b.height) + '<span>m</span>';
-    el('maxh-a').textContent = Math.round(a.maxHeight) + 'm';
-    el('maxh-b').textContent = Math.round(b.maxHeight) + 'm';
-    el('falls-a').textContent = a.falls;
-    el('falls-b').textContent = b.falls;
 
-    const topH      = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
-    const scaleBase = Math.max(topH, MAX_H * 0.1);
+    // Sous-ligne
+    el('sub-a').textContent = 'Record ' + Math.round(a.maxHeight) + 'm  ·  💀 ' + a.falls + (a.falls > 1 ? ' chutes' : ' chute');
+    el('sub-b').textContent = 'Record ' + Math.round(b.maxHeight) + 'm  ·  💀 ' + b.falls + (b.falls > 1 ? ' chutes' : ' chute');
 
-    el('bar-a').style.width   = pct(a.height,    scaleBase) + '%';
-    el('bar-b').style.width   = pct(b.height,    scaleBase) + '%';
-    el('record-a').style.left = pct(a.maxHeight, scaleBase) + '%';
-    el('record-b').style.left = pct(b.maxHeight, scaleBase) + '%';
+    // Barres
+    const top  = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
+    const base = Math.max(top, MAX_H * 0.1);
+    el('bar-a').style.width   = pct(a.height,    base) + '%';
+    el('bar-b').style.width   = pct(b.height,    base) + '%';
+    el('record-a').style.left = pct(a.maxHeight, base) + '%';
+    el('record-b').style.left = pct(b.maxHeight, base) + '%';
 
+    // Diff
     const diff   = Math.abs(a.height - b.height);
     const leader = a.height > b.height ? 'a' : b.height > a.height ? 'b' : 'tie';
-    const badge  = el('leader-badge');
-    const diffEl = el('diff-badge');
-
-    if (SOLO_PLAYER) {
-      const me   = SOLO_PLAYER === 'playerA' ? a : b;
-      const opp  = SOLO_PLAYER === 'playerA' ? b : a;
-      const side = SOLO_PLAYER === 'playerA' ? 'a' : 'b';
-      if (me.height > opp.height) {
-        badge.className   = 'leader-badge ' + side;
-        badge.textContent = '👑 EN TETE +' + Math.round(me.height - opp.height) + 'M';
-      } else if (opp.height > me.height) {
-        badge.className   = 'leader-badge ' + (side === 'a' ? 'b' : 'a');
-        badge.textContent = '⬇ -' + Math.round(opp.height - me.height) + 'M';
-      } else {
-        badge.className = 'leader-badge tie';
-        badge.textContent = 'EGALITE';
-      }
-      return;
-    }
+    const diffEl = el('diff-text');
 
     if (leader === 'tie') {
-      badge.className   = 'leader-badge tie';
-      badge.textContent = 'EGALITE';
-      diffEl.className  = 'diff-badge';
-      diffEl.textContent = 'ECART : 0m';
+      diffEl.className   = 'diff-text';
+      diffEl.textContent = 'EGALITE';
     } else {
       const name = leader === 'a' ? a.name : b.name;
-      badge.className   = 'leader-badge ' + leader;
-      badge.textContent = '👑 ' + name.toUpperCase();
-      diffEl.className  = 'diff-badge leading-' + leader;
-      diffEl.textContent = '+' + Math.round(diff) + 'M POUR ' + name.toUpperCase();
+      diffEl.className   = 'diff-text lead-' + leader;
+      diffEl.textContent = '+' + Math.round(diff) + 'M  ' + name.toUpperCase();
     }
   }
 
   function flashLeadChange(leader, state) {
     if (SOLO_PLAYER && SOLO_PLAYER !== leader) return;
     const name  = leader === 'playerA' ? state.playerA.name : state.playerB.name;
-    const color = leader === 'playerA' ? 'var(--a)' : 'var(--b)';
+    const color = leader === 'playerA' ? '#93c5fd' : '#fcd34d';
     const d = document.createElement('div');
     d.className = 'lead-change-anim';
-    d.style.color = color;
-    d.style.textShadow = '0 0 24px ' + color + ', 0 2px 8px rgba(0,0,0,0.9)';
+    d.style.color      = color;
+    d.style.textShadow = '0 0 20px ' + color + ', 0 2px 10px rgba(0,0,0,0.9)';
     d.textContent = '⛰️ ' + name.toUpperCase() + ' PREND LA TETE !';
     document.body.appendChild(d);
     setTimeout(() => d.remove(), 3200);
@@ -443,22 +321,17 @@
   function spawnFallAnim(playerId) {
     const isA = playerId === 'playerA';
     const d   = document.createElement('div');
-    d.className     = 'fall-anim';
-    d.style.color   = isA ? 'var(--a)' : 'var(--b)';
-    d.style.top     = SOLO_PLAYER ? '60px' : (isA ? '72px' : '115px');
-    d.style.left    = (50 + Math.random() * 100) + 'px';
-    d.textContent   = '💀 CHUTE !';
+    d.className   = 'fall-anim';
+    d.style.color = isA ? '#93c5fd' : '#fcd34d';
+    d.style.top   = SOLO_PLAYER ? '50px' : (isA ? '60px' : '140px');
+    d.style.left  = (40 + Math.random() * 100) + 'px';
+    d.textContent = '💀 CHUTE !';
     document.body.appendChild(d);
     setTimeout(() => d.remove(), 2300);
   }
 
-  function dot(online) {
-    return '<span class="' + (online ? 'online' : 'offline') + '-dot"></span>';
-  }
-  function pct(val, max) {
-    return Math.min(100, Math.max(0, (val / max) * 100)).toFixed(2);
-  }
-  function el(id) { return document.getElementById(id); }
+  function pct(v, m) { return Math.min(100, Math.max(0, (v / m) * 100)).toFixed(2); }
+  function el(id)     { return document.getElementById(id); }
 </script>
 </body>
 </html>
