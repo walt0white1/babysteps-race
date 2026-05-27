@@ -168,19 +168,19 @@
     </div>
     <div class="info">
       <div class="info__alt"><span id="num-a">0</span><small>M</small></div>
-      <div class="info__name" id="name-a">MATTEO</div>
+      <div class="info__name" id="name-a">el_matte0</div>
     </div>
   </div>
 
   <!-- ── PLAYER B ── -->
   <div class="player" data-p="b" id="p-b">
     <div class="avatar" id="av-b">
-      <div class="avatar__initial" id="init-b">A</div>
+      <div class="avatar__initial" id="init-b">T</div>
       <img id="img-b" alt="" onload="this.parentElement.classList.add('loaded')" onerror="this.style.display='none'">
     </div>
     <div class="info">
       <div class="info__alt"><span id="num-b">0</span><small>M</small></div>
-      <div class="info__name" id="name-b">ABDOU</div>
+      <div class="info__name" id="name-b">tvabdou</div>
     </div>
   </div>
 
@@ -196,6 +196,12 @@
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
   loadTwitchAvatar(TWITCH_A, 'img-a');
   loadTwitchAvatar(TWITCH_B, 'img-b');
+
+  // Display Twitch usernames as the player names
+  setText('name-a', TWITCH_A);
+  setText('name-b', TWITCH_B);
+  setText('init-a', TWITCH_A.charAt(0).toUpperCase());
+  setText('init-b', TWITCH_B.charAt(0).toUpperCase());
 
   function loadTwitchAvatar(username, imgId) {
     fetch('https://decapi.me/twitch/avatar/' + encodeURIComponent(username))
@@ -215,13 +221,8 @@
 
   function applyState(s) {
     const a = s.playerA, b = s.playerB;
-
-    setText('name-a', (a.name || 'Matteo').toUpperCase());
-    setText('name-b', (b.name || 'Abdou').toUpperCase());
-    setText('num-a',  Math.round(a.height));
-    setText('num-b',  Math.round(b.height));
-    setText('init-a', (a.name || 'M').charAt(0).toUpperCase());
-    setText('init-b', (b.name || 'A').charAt(0).toUpperCase());
+    setText('num-a', Math.round(a.height));
+    setText('num-b', Math.round(b.height));
   }
 
   function flashLead(leader, state) {
