@@ -10,8 +10,13 @@
 
   <style>
     /* =========================================================================
-       BABY STEPS — Avatar + meters
-       Twitch avatar circle + big altitude number. Minimal.
+       BABY STEPS — MULTI-STYLE OVERLAY
+       Styles available via ?style= param:
+         duo       - 2 avatars + altitudes (default)
+         solo      - single player big showcase
+         scorebug  - tiny football scoreboard
+         banner    - bottom-third banner with stats
+       Solo mode also activates with ?player=playerA or playerB
        ========================================================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -44,67 +49,40 @@
       justify-content: center;
       min-height: 100vh;
       padding: 20px;
-      gap: 44px;
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* ========== ONE PLAYER ========== */
-    .player {
+    .hidden { display: none !important; }
+
+    /* =========================================================================
+       STYLE: DUO (default) — 2 avatars side by side
+       ========================================================================= */
+    .duo {
+      display: flex;
+      align-items: center;
+      gap: 44px;
+    }
+    .duo .player {
       --c:      var(--a);
       --c-glow: var(--a-glow);
-
       display: flex;
       align-items: center;
       gap: 20px;
     }
-    .player[data-p="b"] {
+    .duo .player[data-p="b"] {
       --c:      var(--b);
       --c-glow: var(--b-glow);
     }
-
-    /* ===== Avatar ===== */
-    .avatar {
-      width: 110px;
-      height: 110px;
+    .duo .avatar {
+      width: 110px; height: 110px;
       border-radius: 50%;
+      background: rgba(0,0,0,0.4);
       position: relative;
       flex-shrink: 0;
-      background: rgba(0,0,0,0.4);
-      box-shadow:
-        0 6px 22px rgba(0,0,0,0.75),
-        0 2px 6px rgba(0,0,0,0.55);
+      box-shadow: 0 6px 22px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.55);
     }
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-    }
-    /* Loading placeholder = initial */
-    .avatar__initial {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-weight: 900;
-      font-size: 54px;
-      color: var(--c);
-      text-shadow: 0 0 12px var(--c-glow);
-      pointer-events: none;
-    }
-    .avatar.loaded .avatar__initial { display: none; }
-
-    /* ===== Info ===== */
-    .info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-    }
-    .info__alt {
+    .duo .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .duo .info__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
       font-size: 84px;
@@ -114,7 +92,7 @@
       font-variant-numeric: tabular-nums;
       text-shadow: var(--shadow);
     }
-    .info__alt small {
+    .duo .info__alt small {
       font-family: 'Big Shoulders Display', sans-serif;
       font-size: 48px;
       font-weight: 700;
@@ -122,21 +100,292 @@
       color: var(--c);
       margin-left: 4px;
       text-shadow: var(--shadow), 0 0 14px var(--c-glow);
-      line-height: 0.85;
     }
-    .info__name {
+    .duo .info__name {
       font-family: 'Big Shoulders Display', sans-serif;
       font-size: 36px;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: rgba(255,255,255,0.92);
       text-shadow: var(--shadow);
-      line-height: 1;
       margin-top: 6px;
       text-transform: lowercase;
     }
 
-    /* ===== Animations ===== */
+    /* =========================================================================
+       STYLE: SOLO — single player big showcase
+       ========================================================================= */
+    .solo {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      --c:      var(--a);
+      --c-glow: var(--a-glow);
+    }
+    .solo[data-p="b"] {
+      --c:      var(--b);
+      --c-glow: var(--b-glow);
+    }
+    .solo .avatar {
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .solo .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .solo .info__alt {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 120px;
+      line-height: 0.82;
+      color: #fff;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+    }
+    .solo .info__alt small {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--c);
+      margin-left: 6px;
+      text-shadow: var(--shadow), 0 0 16px var(--c-glow);
+    }
+    .solo .info__name {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 44px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.92);
+      text-shadow: var(--shadow);
+      margin-top: 8px;
+      text-transform: lowercase;
+    }
+    .solo .info__meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      text-shadow: var(--shadow);
+      margin-top: 8px;
+    }
+    .solo .info__meta strong {
+      color: #fff;
+      font-weight: 700;
+      margin: 0 3px;
+    }
+
+    /* =========================================================================
+       STYLE: SCOREBUG — tiny football scoreboard (compact corner)
+       ========================================================================= */
+    .scorebug {
+      display: flex;
+      align-items: stretch;
+      background: linear-gradient(180deg, rgba(8,11,17,0.92), rgba(4,6,10,0.92));
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+      font-family: 'Big Shoulders Display', sans-serif;
+    }
+    .scorebug__side {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+    }
+    .scorebug__side--a {
+      background: linear-gradient(90deg, rgba(34,211,238,0.18), transparent);
+      border-left: 3px solid var(--a);
+    }
+    .scorebug__side--b {
+      background: linear-gradient(270deg, rgba(251,191,36,0.18), transparent);
+      border-right: 3px solid var(--b);
+      flex-direction: row-reverse;
+    }
+    .scorebug__avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .scorebug__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .scorebug__name {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0.02em;
+      text-transform: lowercase;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      white-space: nowrap;
+    }
+    .scorebug__score {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.45);
+    }
+    .scorebug__num {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      min-width: 40px;
+      text-align: center;
+    }
+    .scorebug__num--a { color: var(--a); text-shadow: 0 0 10px var(--a-glow); }
+    .scorebug__num--b { color: var(--b); text-shadow: 0 0 10px var(--b-glow); }
+    .scorebug__sep {
+      font-size: 18px;
+      color: rgba(255,255,255,0.35);
+      font-weight: 500;
+    }
+
+    /* =========================================================================
+       STYLE: BANNER — wide bottom-third with all stats
+       ========================================================================= */
+    .banner {
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+      background: linear-gradient(180deg, rgba(8,11,17,0.92), rgba(4,6,10,0.95));
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+      font-family: 'Big Shoulders Display', sans-serif;
+    }
+    .banner__side {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 24px;
+      position: relative;
+    }
+    .banner__side--a {
+      background: linear-gradient(90deg, rgba(34,211,238,0.16), transparent 70%);
+    }
+    .banner__side--a::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--a);
+      box-shadow: 0 0 12px var(--a-glow);
+    }
+    .banner__side--b {
+      background: linear-gradient(270deg, rgba(251,191,36,0.16), transparent 70%);
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+    .banner__side--b::before {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--b);
+      box-shadow: 0 0 12px var(--b-glow);
+    }
+    .banner__avatar {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
+    .banner__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .banner__info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .banner__side--b .banner__info { align-items: flex-end; }
+    .banner__name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: rgba(255,255,255,0.92);
+      text-transform: lowercase;
+      line-height: 1;
+    }
+    .banner__alt {
+      font-size: 58px;
+      font-weight: 900;
+      line-height: 0.9;
+      color: #fff;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    .banner__alt small {
+      font-size: 30px;
+      font-weight: 700;
+      margin-left: 3px;
+      line-height: 0.9;
+    }
+    .banner__side--a .banner__alt small { color: var(--a); text-shadow: 0 0 10px var(--a-glow); }
+    .banner__side--b .banner__alt small { color: var(--b); text-shadow: 0 0 10px var(--b-glow); }
+    .banner__stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+    }
+    .banner__stats strong {
+      color: #fff;
+      font-weight: 700;
+      margin: 0 2px;
+    }
+
+    /* Central VS divider */
+    .banner__vs {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.45);
+      min-width: 110px;
+    }
+    .banner__vs-label {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .banner__delta {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+    }
+    .banner__delta-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ========== FLASH + SHAKE ========== */
     @keyframes leadEnter {
       0%   { opacity: 0; transform: translateY(-6px); }
       18%  { opacity: 1; transform: translateY(0); }
@@ -145,87 +394,151 @@
     }
     .flash {
       position: fixed;
-      top: 4px; left: 0; right: 0;
+      top: 6px; left: 0; right: 0;
       text-align: center;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 700;
-      font-size: 10px;
-      letter-spacing: 0.28em;
+      font-size: 16px;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
       pointer-events: none;
-      animation: leadEnter 2.6s ease forwards;
+      animation: leadEnter 2.8s ease forwards;
       z-index: 999;
     }
-
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       30%      { transform: translateX(-3px); }
       60%      { transform: translateX(3px); }
     }
-    .player.shaking { animation: shake 0.3s ease; }
-
-    .hidden { display: none !important; }
+    .shaking { animation: shake 0.3s ease; }
   </style>
 </head>
 <body>
 
-  <!-- ── PLAYER A ── -->
-  <div class="player" data-p="a" id="p-a">
-    <div class="avatar" id="av-a">
-      <div class="avatar__initial" id="init-a">M</div>
-      <img id="img-a" alt="" onload="this.parentElement.classList.add('loaded')" onerror="this.style.display='none'">
-    </div>
+<!-- ── DUO ── -->
+<div class="duo" id="duo">
+  <div class="player" data-p="a" id="duo-a">
+    <div class="avatar"><img id="duo-img-a" alt=""></div>
     <div class="info">
-      <div class="info__alt"><span id="num-a">0</span><small>m</small></div>
-      <div class="info__name" id="name-a">el_matte0</div>
+      <div class="info__alt"><span id="duo-num-a">0</span><small>m</small></div>
+      <div class="info__name" id="duo-name-a">el_matte0</div>
     </div>
   </div>
+  <div class="player" data-p="b" id="duo-b">
+    <div class="avatar"><img id="duo-img-b" alt=""></div>
+    <div class="info">
+      <div class="info__alt"><span id="duo-num-b">0</span><small>m</small></div>
+      <div class="info__name" id="duo-name-b">tvabdou</div>
+    </div>
+  </div>
+</div>
 
-  <!-- ── PLAYER B ── -->
-  <div class="player" data-p="b" id="p-b">
-    <div class="avatar" id="av-b">
-      <div class="avatar__initial" id="init-b">T</div>
-      <img id="img-b" alt="" onload="this.parentElement.classList.add('loaded')" onerror="this.style.display='none'">
-    </div>
-    <div class="info">
-      <div class="info__alt"><span id="num-b">0</span><small>m</small></div>
-      <div class="info__name" id="name-b">tvabdou</div>
+<!-- ── SOLO ── -->
+<div class="solo hidden" id="solo">
+  <div class="avatar"><img id="solo-img" alt=""></div>
+  <div class="info">
+    <div class="info__alt"><span id="solo-num">0</span><small>m</small></div>
+    <div class="info__name" id="solo-name">player</div>
+    <div class="info__meta">peak <strong id="solo-peak">0</strong>m · <strong id="solo-falls">0</strong> falls</div>
+  </div>
+</div>
+
+<!-- ── SCOREBUG ── -->
+<div class="scorebug hidden" id="scorebug">
+  <div class="scorebug__side scorebug__side--a">
+    <div class="scorebug__avatar"><img id="sb-img-a" alt=""></div>
+    <div class="scorebug__name" id="sb-name-a">el_matte0</div>
+  </div>
+  <div class="scorebug__score">
+    <div class="scorebug__num scorebug__num--a" id="sb-num-a">0</div>
+    <div class="scorebug__sep">—</div>
+    <div class="scorebug__num scorebug__num--b" id="sb-num-b">0</div>
+  </div>
+  <div class="scorebug__side scorebug__side--b">
+    <div class="scorebug__avatar"><img id="sb-img-b" alt=""></div>
+    <div class="scorebug__name" id="sb-name-b">tvabdou</div>
+  </div>
+</div>
+
+<!-- ── BANNER ── -->
+<div class="banner hidden" id="banner">
+  <div class="banner__side banner__side--a">
+    <div class="banner__avatar"><img id="bn-img-a" alt=""></div>
+    <div class="banner__info">
+      <div class="banner__name" id="bn-name-a">el_matte0</div>
+      <div class="banner__alt"><span id="bn-num-a">0</span><small>m</small></div>
+      <div class="banner__stats">peak <strong id="bn-peak-a">0</strong>m · <strong id="bn-falls-a">0</strong> falls</div>
     </div>
   </div>
+  <div class="banner__vs">
+    <div class="banner__vs-label">vs</div>
+    <div class="banner__delta" id="bn-delta">0</div>
+    <div class="banner__delta-label" id="bn-delta-label">tied</div>
+  </div>
+  <div class="banner__side banner__side--b">
+    <div class="banner__avatar"><img id="bn-img-b" alt=""></div>
+    <div class="banner__info">
+      <div class="banner__name" id="bn-name-b">tvabdou</div>
+      <div class="banner__alt"><span id="bn-num-b">0</span><small>m</small></div>
+      <div class="banner__stats">peak <strong id="bn-peak-b">0</strong>m · <strong id="bn-falls-b">0</strong> falls</div>
+    </div>
+  </div>
+</div>
 
 <script>
+  // =========================================================================
+  // CONFIG
+  // =========================================================================
   const params      = new URLSearchParams(window.location.search);
-  const SOLO_PLAYER = params.get('player');
+  const SOLO_PLAYER = params.get('player');         // 'playerA' | 'playerB' | null
+  const STYLE       = params.get('style') || (SOLO_PLAYER ? 'solo' : 'duo');
 
-  if (SOLO_PLAYER === 'playerA') el('p-b').classList.add('hidden');
-  else if (SOLO_PLAYER === 'playerB') el('p-a').classList.add('hidden');
-
-  // ── Fetch Twitch avatars via decapi (public, no auth) ──
   const TWITCH_A = params.get('twitchA') || 'el_matte0';
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
-  loadTwitchAvatar(TWITCH_A, 'img-a');
-  loadTwitchAvatar(TWITCH_B, 'img-b');
 
-  // Display Twitch usernames as the player names
-  setText('name-a', TWITCH_A);
-  setText('name-b', TWITCH_B);
-  setText('init-a', TWITCH_A.charAt(0).toUpperCase());
-  setText('init-b', TWITCH_B.charAt(0).toUpperCase());
+  // =========================================================================
+  // SHOW THE RIGHT LAYOUT
+  // =========================================================================
+  document.getElementById('duo').classList.toggle('hidden',      STYLE !== 'duo');
+  document.getElementById('solo').classList.toggle('hidden',     STYLE !== 'solo');
+  document.getElementById('scorebug').classList.toggle('hidden', STYLE !== 'scorebug');
+  document.getElementById('banner').classList.toggle('hidden',   STYLE !== 'banner');
 
-  function loadTwitchAvatar(username, imgId) {
+  // Solo: choose player A or B
+  if (STYLE === 'solo') {
+    const pid = SOLO_PLAYER || 'playerA';
+    document.getElementById('solo').dataset.p = pid === 'playerA' ? 'a' : 'b';
+  }
+
+  // =========================================================================
+  // LOAD TWITCH AVATARS (in 600x600 for HiDPI)
+  // =========================================================================
+  loadTwitchAvatar(TWITCH_A, ['duo-img-a', 'sb-img-a', 'bn-img-a', STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null]);
+  loadTwitchAvatar(TWITCH_B, ['duo-img-b', 'sb-img-b', 'bn-img-b', STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null]);
+
+  // Set pseudonyms across all layouts
+  setText('duo-name-a', TWITCH_A); setText('duo-name-b', TWITCH_B);
+  setText('sb-name-a',  TWITCH_A); setText('sb-name-b',  TWITCH_B);
+  setText('bn-name-a',  TWITCH_A); setText('bn-name-b',  TWITCH_B);
+  if (STYLE === 'solo') setText('solo-name', SOLO_PLAYER === 'playerB' ? TWITCH_B : TWITCH_A);
+
+  function loadTwitchAvatar(username, imgIds) {
     fetch('https://decapi.me/twitch/avatar/' + encodeURIComponent(username))
       .then(r => r.text())
       .then(url => {
-        if (url && url.startsWith('http')) {
-          // Upgrade Twitch avatar to 600x600 for HiDPI/4K
-          // URL format: ...-profile_image-300x300.png  =>  ...-profile_image-600x600.png
-          const hiRes = url.replace(/-\d+x\d+(\.\w+)$/, '-600x600$1');
-          document.getElementById(imgId).src = hiRes;
-        }
+        if (!url || !url.startsWith('http')) return;
+        const hiRes = url.replace(/-\d+x\d+(\.\w+)$/, '-600x600$1');
+        imgIds.filter(Boolean).forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.src = hiRes;
+        });
       })
       .catch(() => {});
   }
 
+  // =========================================================================
+  // SOCKET
+  // =========================================================================
   const socket = io(window.location.origin);
   socket.on('state_sync', applyState);
   socket.on('lead_change', ({ leader, state }) => { applyState(state); flashLead(leader, state); });
@@ -233,35 +546,89 @@
 
   function applyState(s) {
     const a = s.playerA, b = s.playerB;
-    setText('num-a', Math.round(a.height));
-    setText('num-b', Math.round(b.height));
+    const aH = Math.round(a.height);
+    const bH = Math.round(b.height);
+
+    // duo
+    setText('duo-num-a', aH);
+    setText('duo-num-b', bH);
+
+    // solo
+    if (STYLE === 'solo') {
+      const p = SOLO_PLAYER === 'playerB' ? b : a;
+      setText('solo-num',  Math.round(p.height));
+      setText('solo-peak', Math.round(p.maxHeight));
+      setText('solo-falls', p.falls);
+    }
+
+    // scorebug
+    setText('sb-num-a', aH);
+    setText('sb-num-b', bH);
+
+    // banner
+    setText('bn-num-a', aH);
+    setText('bn-num-b', bH);
+    setText('bn-peak-a', Math.round(a.maxHeight));
+    setText('bn-peak-b', Math.round(b.maxHeight));
+    setText('bn-falls-a', a.falls);
+    setText('bn-falls-b', b.falls);
+
+    const diff = aH - bH;
+    const dEl = document.getElementById('bn-delta');
+    const dlEl = document.getElementById('bn-delta-label');
+    if (dEl && dlEl) {
+      if (diff === 0) {
+        dEl.textContent = '0';
+        dEl.style.color = '#fff';
+        dlEl.textContent = 'tied';
+        dlEl.style.color = 'rgba(255,255,255,0.4)';
+      } else if (diff > 0) {
+        dEl.textContent = '+' + Math.abs(diff);
+        dEl.style.color = 'var(--a)';
+        dEl.style.textShadow = '0 0 12px var(--a-glow)';
+        dlEl.textContent = TWITCH_A;
+        dlEl.style.color = 'var(--a)';
+      } else {
+        dEl.textContent = '+' + Math.abs(diff);
+        dEl.style.color = 'var(--b)';
+        dEl.style.textShadow = '0 0 12px var(--b-glow)';
+        dlEl.textContent = TWITCH_B;
+        dlEl.style.color = 'var(--b)';
+      }
+    }
   }
 
   function flashLead(leader, state) {
     if (SOLO_PLAYER && SOLO_PLAYER !== leader) return;
     if (leader === 'tie') return;
-    const name  = leader === 'playerA' ? (state.playerA.name || 'Matteo') : (state.playerB.name || 'Abdou');
+    const name  = leader === 'playerA' ? TWITCH_A : TWITCH_B;
     const color = leader === 'playerA' ? '#22d3ee' : '#fbbf24';
     const glow  = leader === 'playerA' ? 'rgba(34,211,238,0.6)' : 'rgba(251,191,36,0.6)';
     const d = document.createElement('div');
     d.className = 'flash';
     d.style.color = color;
     d.style.textShadow = '0 0 14px ' + glow + ', 0 2px 8px rgba(0,0,0,0.95)';
-    d.textContent = '↑ ' + name.toUpperCase() + ' LEADS';
+    d.textContent = '↑ ' + name + ' leads';
     document.body.appendChild(d);
-    setTimeout(() => d.remove(), 2700);
+    setTimeout(() => d.remove(), 2900);
   }
 
   function shakeFall(playerId) {
-    const id = playerId === 'playerA' ? 'p-a' : 'p-b';
-    const n = el(id);
-    if (!n) return;
-    n.classList.add('shaking');
-    setTimeout(() => n.classList.remove('shaking'), 320);
+    // Shake the relevant card depending on the active style
+    const targets = [];
+    if (STYLE === 'duo')      targets.push(playerId === 'playerA' ? 'duo-a' : 'duo-b');
+    if (STYLE === 'solo')     targets.push('solo');
+    if (STYLE === 'scorebug') targets.push('scorebug');
+    if (STYLE === 'banner')   targets.push('banner');
+    targets.forEach(id => {
+      const n = document.getElementById(id);
+      if (!n) return;
+      n.classList.add('shaking');
+      setTimeout(() => n.classList.remove('shaking'), 320);
+    });
   }
 
-  function el(id)         { return document.getElementById(id); }
-  function setText(id, t) { const n = el(id); if (n) n.textContent = t; }
+  function setText(id, t) { const n = document.getElementById(id); if (n) n.textContent = t; }
 </script>
 </body>
 </html>
