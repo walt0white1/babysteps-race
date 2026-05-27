@@ -136,10 +136,13 @@ function onFileChange() {
 // Lecture initiale au demarrage
 onFileChange();
 
-// Surveille le fichier
+// Surveille le fichier (event-based, rapide mais Windows peut rater des events)
 fs.watch(SAVE_PATH, { persistent: true }, (event) => {
   if (event === 'change') onFileChange();
 });
 
-console.log('[Tracker] Surveillance active. Joue et regarde la progression !');
+// Polling de secours toutes les 250ms (rattrape les events manques)
+setInterval(onFileChange, 250);
+
+console.log('[Tracker] Surveillance active (event + poll 250ms). Joue !');
 console.log('(Ctrl+C pour arreter)\n');

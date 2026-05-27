@@ -594,26 +594,26 @@
     const bH = toM(b.height);
 
     // duo
-    setText('duo-num-a', aH);
-    setText('duo-num-b', bH);
+    setNumSmooth('duo-num-a', aH);
+    setNumSmooth('duo-num-b', bH);
 
     // solo
     if (STYLE === 'solo') {
       const p = SOLO_PLAYER === 'playerB' ? b : a;
-      setText('solo-num',  toM(p.height));
-      setText('solo-peak', toM(p.maxHeight));
+      setNumSmooth('solo-num',  toM(p.height));
+      setNumSmooth('solo-peak', toM(p.maxHeight));
       setText('solo-falls', p.falls);
     }
 
     // scorebug
-    setText('sb-num-a', aH);
-    setText('sb-num-b', bH);
+    setNumSmooth('sb-num-a', aH);
+    setNumSmooth('sb-num-b', bH);
 
     // banner
-    setText('bn-num-a', aH);
-    setText('bn-num-b', bH);
-    setText('bn-peak-a', toM(a.maxHeight));
-    setText('bn-peak-b', toM(b.maxHeight));
+    setNumSmooth('bn-num-a', aH);
+    setNumSmooth('bn-num-b', bH);
+    setNumSmooth('bn-peak-a', toM(a.maxHeight));
+    setNumSmooth('bn-peak-b', toM(b.maxHeight));
     setText('bn-falls-a', a.falls);
     setText('bn-falls-b', b.falls);
 
@@ -673,6 +673,30 @@
   }
 
   function setText(id, t) { const n = document.getElementById(id); if (n) n.textContent = t; }
+
+  // ── Smooth number tween: anime de la valeur actuelle vers la nouvelle ──
+  const tweens = {};  // id => {raf, from, to, start}
+  const TWEEN_MS = 500;
+  function setNumSmooth(id, target) {
+    const n = document.getElementById(id);
+    if (!n) return;
+    target = Number(target) || 0;
+    const current = Number(n.textContent.replace(/\D/g, '')) || 0;
+    if (current === target) return;
+
+    if (tweens[id]) cancelAnimationFrame(tweens[id].raf);
+    const start = performance.now();
+    const from  = current;
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / TWEEN_MS);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      const val = Math.round(from + (target - from) * eased);
+      n.textContent = val;
+      if (t < 1) tweens[id] = { raf: requestAnimationFrame(step), from, to: target, start };
+      else delete tweens[id];
+    };
+    tweens[id] = { raf: requestAnimationFrame(step), from, to: target, start };
+  }
 </script>
 </body>
 </html>
