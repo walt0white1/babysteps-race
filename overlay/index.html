@@ -196,81 +196,103 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: flex-start;
-      min-width: 90px;
-      padding: 2px 0;
+      min-width: 140px;
+      padding: 4px 0;
     }
 
     .info__top {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
+
+    /* NAME — strong editorial italic */
     .info__name {
       font-family: 'Fraunces', serif;
       font-style: italic;
-      font-weight: 500;
-      font-size: 17px;
-      letter-spacing: 0.01em;
+      font-weight: 600;
+      font-size: 26px;
+      letter-spacing: -0.005em;
       color: var(--c);
-      text-shadow: var(--shadow);
+      text-shadow:
+        0 1px 2px rgba(0,0,0,0.95),
+        0 0 12px rgba(0,0,0,0.7),
+        0 0 24px color-mix(in srgb, var(--c) 30%, transparent);
       font-variation-settings: "opsz" 144;
       white-space: nowrap;
-    }
-    .info__num {
-      font-family: 'Antonio', sans-serif;
-      font-weight: 300;
-      font-size: 68px;
-      line-height: 0.85;
-      color: #fff;
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
-      text-shadow: var(--shadow);
-      margin-top: 2px;
-    }
-    .info__num--small { font-size: 54px; }
-    .info__unit {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      font-weight: 500;
-      letter-spacing: 0.28em;
-      color: rgba(255,255,255,0.8);
-      text-shadow: var(--shadow);
-      margin-top: 3px;
+      line-height: 1;
     }
 
+    /* ALTITUDE — the hero number, dominant */
+    .info__num {
+      font-family: 'Antonio', sans-serif;
+      font-weight: 400;
+      font-size: 104px;
+      line-height: 0.8;
+      color: #fff;
+      letter-spacing: -0.035em;
+      font-variant-numeric: tabular-nums;
+      text-shadow:
+        0 2px 4px rgba(0,0,0,0.95),
+        0 0 18px rgba(0,0,0,0.8),
+        0 0 32px color-mix(in srgb, var(--c) 22%, transparent);
+      margin-top: 6px;
+    }
+    .info__num--small { font-size: 80px; }
+
+    /* METRES label — tracked, present */
+    .info__unit {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.42em;
+      color: rgba(255,255,255,0.65);
+      text-shadow: var(--shadow);
+      margin-top: 6px;
+      padding-left: 2px;
+    }
+
+    /* PEAK + FALLS — secondary, but readable */
     .info__bot {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 500;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
     }
     .info__peak {
-      color: rgba(255,255,255,0.78);
+      color: rgba(255,255,255,0.55);
       text-shadow: var(--shadow);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
     }
     .info__peak strong {
       font-family: 'Antonio', sans-serif;
-      font-weight: 400;
-      font-size: 15px;
-      color: #fff;
-      letter-spacing: 0;
-      margin-left: 4px;
+      font-weight: 500;
+      font-size: 22px;
+      color: var(--c);
+      letter-spacing: -0.02em;
+      text-shadow:
+        var(--shadow),
+        0 0 12px color-mix(in srgb, var(--c) 40%, transparent);
     }
     .info__falls {
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.4);
       text-shadow: var(--shadow);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
     }
     .info__falls strong {
       font-family: 'Antonio', sans-serif;
-      font-weight: 400;
-      font-size: 14px;
-      color: rgba(255,255,255,0.9);
-      letter-spacing: 0;
-      margin-right: 4px;
+      font-weight: 500;
+      font-size: 20px;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: -0.02em;
     }
 
     /* ===== Animations ===== */
@@ -324,7 +346,7 @@
         <div class="info__unit">METRES</div>
       </div>
       <div class="info__bot">
-        <div class="info__peak">peak<strong id="peak-a">0</strong></div>
+        <div class="info__peak"><strong id="peak-a">0</strong>peak</div>
         <div class="info__falls"><strong id="falls-a">00</strong>falls</div>
       </div>
     </div>
@@ -345,7 +367,7 @@
         <div class="info__unit">METRES</div>
       </div>
       <div class="info__bot">
-        <div class="info__peak">peak<strong id="peak-b">0</strong></div>
+        <div class="info__peak"><strong id="peak-b">0</strong>peak</div>
         <div class="info__falls"><strong id="falls-b">00</strong>falls</div>
       </div>
     </div>
