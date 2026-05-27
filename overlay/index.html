@@ -38,8 +38,8 @@
     body {
       display: flex;
       align-items: flex-start;
-      padding: 8px;
-      gap: 28px;
+      padding: 10px;
+      gap: 36px;
     }
 
     /* ========== ONE PLAYER ========== */
@@ -49,9 +49,9 @@
       --c-glow: var(--a-glow);
 
       display: flex;
-      gap: 10px;
+      gap: 14px;
       align-items: stretch;
-      height: 280px;
+      height: 440px;
     }
     .player[data-p="b"] {
       --c:      var(--b);
@@ -61,71 +61,118 @@
 
     /* ===== Gauge ===== */
     .gauge {
-      width: 28px;
+      width: 38px;
       height: 100%;
       position: relative;
-      background: rgba(0,0,0,0.45);
-      border-radius: 14px;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.4));
+      border-radius: 19px;
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.07),
-        0 2px 6px rgba(0,0,0,0.6);
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -1px 0 rgba(0,0,0,0.4),
+        inset 0 0 0 1px rgba(255,255,255,0.06),
+        0 4px 16px rgba(0,0,0,0.5),
+        0 2px 4px rgba(0,0,0,0.4);
       overflow: visible;
     }
 
     .gauge__track {
       position: absolute;
       inset: 0;
-      border-radius: 14px;
+      border-radius: 19px;
       overflow: hidden;
+    }
+
+    /* Subtle inner shadow at top of track (depth) */
+    .gauge__track::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(120% 30% at 50% 0%, rgba(0,0,0,0.4) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 4;
     }
 
     .gauge__fill {
       position: absolute;
       left: 0; right: 0; bottom: 0;
       height: 0%;
-      border-radius: 14px;
-      background: linear-gradient(180deg,
-        var(--c) 0%,
-        color-mix(in srgb, var(--c) 75%, var(--c-deep)) 40%,
-        var(--c-deep) 100%);
+      border-radius: 19px;
+      background:
+        linear-gradient(180deg,
+          color-mix(in srgb, var(--c) 110%, white 10%) 0%,
+          var(--c) 8%,
+          color-mix(in srgb, var(--c) 80%, var(--c-deep)) 35%,
+          color-mix(in srgb, var(--c) 50%, var(--c-deep)) 65%,
+          var(--c-deep) 100%);
       transition: height 0.85s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.4),
+        inset 1px 0 0 rgba(255,255,255,0.15),
+        inset -1px 0 0 rgba(0,0,0,0.2);
     }
 
-    /* Meniscus glow */
+    /* Vertical glass highlight on the fill */
+    .gauge__fill > .shine {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: 6px;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.35) 0%,
+        rgba(255,255,255,0.05) 100%);
+      border-radius: 3px;
+      pointer-events: none;
+    }
+
+    /* Meniscus glow - large diffuse halo */
     .gauge__fill::before {
       content: '';
       position: absolute;
-      top: -10px; left: -150%; right: -150%;
-      height: 22px;
+      top: -16px; left: -120%; right: -120%;
+      height: 32px;
       background: radial-gradient(ellipse at center,
-        var(--c) 0%,
-        var(--c-glow) 35%,
-        transparent 70%);
-      filter: blur(4px);
-      animation: pulse 2.6s ease-in-out infinite;
+        color-mix(in srgb, var(--c) 110%, white 10%) 0%,
+        var(--c) 15%,
+        var(--c-glow) 45%,
+        transparent 75%);
+      filter: blur(5px);
+      animation: pulse 2.8s ease-in-out infinite;
       pointer-events: none;
+      z-index: 5;
     }
+    /* Bright crisp meniscus line */
     .gauge__fill::after {
       content: '';
       position: absolute;
-      top: -1px; left: 0; right: 0;
-      height: 2px;
-      background: var(--c);
-      box-shadow: 0 0 6px var(--c), 0 0 14px var(--c-glow);
+      top: -1.5px; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,0.9) 0%,
+        var(--c) 100%);
+      border-radius: 2px;
+      box-shadow:
+        0 0 8px var(--c),
+        0 0 16px var(--c-glow),
+        0 0 24px var(--c-glow);
+      z-index: 6;
     }
     @keyframes pulse {
       0%, 100% { opacity: 0.85; }
       50%      { opacity: 1; }
     }
 
-    /* Record marker */
+    /* Record marker - hairline + chevron */
     .gauge__rec {
       position: absolute;
-      left: -4px; right: -4px;
+      left: -5px; right: -5px;
       height: 1.5px;
-      background: rgba(255,255,255,0.8);
-      box-shadow: 0 0 5px rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.85);
+      box-shadow:
+        0 0 6px rgba(255,255,255,0.7),
+        0 0 12px rgba(255,255,255,0.35);
       transition: bottom 0.55s ease;
       z-index: 3;
       pointer-events: none;
@@ -133,11 +180,12 @@
     .gauge__rec::before {
       content: '';
       position: absolute;
-      left: -5px; top: -3px;
+      left: -6px; top: -3.5px;
       width: 0; height: 0;
-      border-top: 4px solid transparent;
-      border-bottom: 4px solid transparent;
-      border-left: 5px solid rgba(255,255,255,0.95);
+      border-top: 4.5px solid transparent;
+      border-bottom: 4.5px solid transparent;
+      border-left: 6px solid #fff;
+      filter: drop-shadow(0 0 3px rgba(255,255,255,0.6));
     }
 
     /* ===== Text column ===== */
@@ -146,19 +194,20 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: flex-start;
-      min-width: 60px;
+      min-width: 90px;
+      padding: 2px 0;
     }
 
     .info__top {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
     }
     .info__name {
       font-family: 'Fraunces', serif;
       font-style: italic;
       font-weight: 500;
-      font-size: 12px;
+      font-size: 17px;
       letter-spacing: 0.01em;
       color: var(--c);
       text-shadow: var(--shadow);
@@ -168,46 +217,46 @@
     .info__num {
       font-family: 'Antonio', sans-serif;
       font-weight: 300;
-      font-size: 44px;
+      font-size: 68px;
       line-height: 0.85;
       color: #fff;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.03em;
       font-variant-numeric: tabular-nums;
       text-shadow: var(--shadow);
-      margin-top: 1px;
+      margin-top: 2px;
     }
-    .info__num--small { font-size: 34px; }
+    .info__num--small { font-size: 54px; }
     .info__unit {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
+      font-size: 9px;
       font-weight: 500;
-      letter-spacing: 0.25em;
-      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.28em;
+      color: rgba(255,255,255,0.8);
       text-shadow: var(--shadow);
-      margin-top: 1px;
+      margin-top: 3px;
     }
 
     .info__bot {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
+      font-size: 9px;
       font-weight: 500;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
     }
     .info__peak {
-      color: rgba(255,255,255,0.75);
+      color: rgba(255,255,255,0.78);
       text-shadow: var(--shadow);
     }
     .info__peak strong {
       font-family: 'Antonio', sans-serif;
       font-weight: 400;
-      font-size: 11px;
+      font-size: 15px;
       color: #fff;
       letter-spacing: 0;
-      margin-left: 2px;
+      margin-left: 4px;
     }
     .info__falls {
       color: rgba(255,255,255,0.55);
@@ -216,10 +265,10 @@
     .info__falls strong {
       font-family: 'Antonio', sans-serif;
       font-weight: 400;
-      font-size: 10px;
+      font-size: 14px;
       color: rgba(255,255,255,0.9);
       letter-spacing: 0;
-      margin-right: 2px;
+      margin-right: 4px;
     }
 
     /* ===== Animations ===== */
@@ -262,7 +311,7 @@
   <div class="player" data-p="a" id="p-a">
     <div class="gauge">
       <div class="gauge__track">
-        <div class="gauge__fill" id="fill-a" style="height:0%"></div>
+        <div class="gauge__fill" id="fill-a" style="height:0%"><div class="shine"></div></div>
       </div>
       <div class="gauge__rec" id="rec-a" style="bottom:0%"></div>
     </div>
@@ -283,7 +332,7 @@
   <div class="player" data-p="b" id="p-b">
     <div class="gauge">
       <div class="gauge__track">
-        <div class="gauge__fill" id="fill-b" style="height:0%"></div>
+        <div class="gauge__fill" id="fill-b" style="height:0%"><div class="shine"></div></div>
       </div>
       <div class="gauge__rec" id="rec-b" style="bottom:0%"></div>
     </div>
