@@ -161,20 +161,49 @@
       margin-top: 8px;
       text-transform: lowercase;
     }
+    /* Solo stats panel — two cells separated by a thin divider */
     .solo .info__meta {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
-      text-shadow: var(--shadow);
-      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 16px;
     }
-    .solo .info__meta strong {
-      color: #fff;
+    .meta-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .meta-cell__num {
+      font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 700;
-      margin: 0 3px;
+      font-size: 34px;
+      line-height: 0.9;
+      color: #fff;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+    }
+    .meta-cell__num small {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--c);
+      margin-left: 2px;
+      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
+    }
+    .meta-cell__label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      text-shadow: var(--shadow);
+    }
+    .meta-divider {
+      width: 1px;
+      height: 38px;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.18), transparent);
     }
 
     /* =========================================================================
@@ -439,7 +468,17 @@
   <div class="info">
     <div class="info__alt"><span id="solo-num">0</span><small>m</small></div>
     <div class="info__name" id="solo-name">player</div>
-    <div class="info__meta">peak <strong id="solo-peak">0</strong>m · <strong id="solo-falls">0</strong> falls</div>
+    <div class="info__meta">
+      <div class="meta-cell">
+        <div class="meta-cell__num"><span id="solo-peak">0</span><small>m</small></div>
+        <div class="meta-cell__label">peak</div>
+      </div>
+      <div class="meta-divider"></div>
+      <div class="meta-cell">
+        <div class="meta-cell__num"><span id="solo-falls">0</span></div>
+        <div class="meta-cell__label">falls</div>
+      </div>
+    </div>
   </div>
 </div>
 
