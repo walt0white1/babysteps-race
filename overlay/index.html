@@ -536,8 +536,8 @@
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
 
   // ── Scaling factor: raw save units per displayed metre ──
-  // Calibré pour ~1 pas = 1 m. Override via ?scale=200 etc.
-  const SCALE = Math.max(1, parseFloat(params.get('scale')) || 175);
+  // 80 = compteur reactif, ~1-2m par mouvement notable. Override via ?scale=X
+  const SCALE = Math.max(1, parseFloat(params.get('scale')) || 80);
   const toM = (v) => Math.round((v || 0) / SCALE);
 
   // =========================================================================
