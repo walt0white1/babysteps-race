@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Baby Steps — Altimeter</title>
+  <title>Baby Steps — Overlay</title>
   <script src="/socket.io/socket.io.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,214 +10,99 @@
 
   <style>
     /* =========================================================================
-       BABY STEPS — ALTIMETER OVERLAY
-       Aesthetic: editorial mountaineering instrument.
-       Antonio (condensed numerics) · Fraunces (editorial italic) · JetBrains Mono.
-       Glacial cyan / Alpine amber. Hairline frames. Pulsing meniscus.
+       BABY STEPS — minimal floating altimeter
+       No card. Just the gauge + text floating, with text-shadows for legibility.
        ========================================================================= */
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --ink:        #07090d;
-      --ink-2:      #0e1218;
-      --frame:      rgba(232, 235, 240, 0.09);
-      --frame-2:    rgba(232, 235, 240, 0.04);
-      --text:       #e8ebf0;
-      --text-dim:   #8a93a3;
-      --text-faint: #4a5163;
+      --a:      #67e8f9;
+      --a-deep: #155e75;
+      --a-glow: rgba(103, 232, 249, 0.55);
 
-      --a:          #67e8f9;
-      --a-deep:     #155e75;
-      --a-glow:     rgba(103, 232, 249, 0.55);
+      --b:      #fbbf24;
+      --b-deep: #78350f;
+      --b-glow: rgba(251, 191, 36, 0.55);
 
-      --b:          #fbbf24;
-      --b-deep:     #78350f;
-      --b-glow:     rgba(251, 191, 36, 0.55);
+      --shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.7);
     }
 
     html, body {
       background: transparent;
       width: 100%; height: 100%;
       overflow: hidden;
-      color: var(--text);
+      color: #fff;
       -webkit-font-smoothing: antialiased;
-      font-family: 'Fraunces', serif;
     }
 
     body {
       display: flex;
       align-items: flex-start;
       padding: 8px;
+      gap: 28px;
     }
 
-    /* ========== STAGE ========== */
-    .stage {
-      display: flex;
-      gap: 0;
-      align-items: stretch;
-    }
-
-    /* ========== CARD ========== */
-    .card {
+    /* ========== ONE PLAYER ========== */
+    .player {
       --c:      var(--a);
       --c-deep: var(--a-deep);
       --c-glow: var(--a-glow);
 
-      width: 134px;
-      height: 320px;
-      padding: 12px 11px 10px;
-      position: relative;
       display: flex;
-      flex-direction: column;
-      overflow: hidden;
-
-      background:
-        radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.025) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(14,18,24,0.94), rgba(7,9,13,0.94));
-      border: 1px solid var(--frame);
-      border-radius: 16px;
-      box-shadow:
-        0 0 0 1px var(--frame-2),
-        0 12px 32px -10px rgba(0,0,0,0.65),
-        inset 0 1px 0 rgba(255,255,255,0.05);
+      gap: 10px;
+      align-items: stretch;
+      height: 280px;
     }
-
-    .card[data-player="b"] {
+    .player[data-p="b"] {
       --c:      var(--b);
       --c-deep: var(--b-deep);
       --c-glow: var(--b-glow);
     }
 
-    /* Corner bezel brackets — instrument detail */
-    .card::before,
-    .card::after {
-      content: '';
-      position: absolute;
-      width: 10px; height: 10px;
-      border: 1px solid var(--frame);
-      pointer-events: none;
-    }
-    .card::before {
-      top: 5px; left: 5px;
-      border-right: 0; border-bottom: 0;
-      border-top-left-radius: 11px;
-    }
-    .card::after {
-      bottom: 5px; right: 5px;
-      border-left: 0; border-top: 0;
-      border-bottom-right-radius: 11px;
-    }
-
-    /* ========== HEAD ========== */
-    .head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .head__name {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 500;
-      font-size: 13px;
-      letter-spacing: -0.005em;
-      font-variation-settings: "opsz" 144;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .head__id {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      color: var(--text-faint);
-      flex-shrink: 0;
-    }
-
-    .rule {
-      height: 1px;
-      background: linear-gradient(90deg, var(--frame), var(--frame-2) 70%, transparent);
-      margin: 5px 0 7px;
-    }
-
-    /* ========== BODY ========== */
-    .body {
-      display: flex;
-      gap: 10px;
-      flex: 1;
-      min-height: 0;
-    }
-
-    /* --- Gauge column --- */
+    /* ===== Gauge ===== */
     .gauge {
-      width: 18px;
-      flex-shrink: 0;
+      width: 10px;
+      height: 100%;
       position: relative;
+      background: rgba(0,0,0,0.4);
+      border-radius: 5px;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.06),
+        0 1px 4px rgba(0,0,0,0.6);
+      overflow: visible;
     }
 
     .gauge__track {
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008));
-      border-radius: 9px;
-      border: 1px solid rgba(255,255,255,0.045);
+      border-radius: 5px;
       overflow: hidden;
     }
 
-    /* Minor + major tick marks */
-    .gauge__track::before {
-      content: '';
-      position: absolute;
-      inset: 4px 0;
-      background:
-        repeating-linear-gradient(0deg,
-          transparent 0 9px,
-          rgba(255,255,255,0.05) 9px 10px);
-      z-index: 1;
-      pointer-events: none;
-    }
-    .gauge__track::after {
-      content: '';
-      position: absolute;
-      inset: 4px 0;
-      background:
-        repeating-linear-gradient(0deg,
-          transparent 0 45px,
-          rgba(255,255,255,0.13) 45px 46px);
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    /* Fill — rises from the bottom */
     .gauge__fill {
       position: absolute;
       left: 0; right: 0; bottom: 0;
       height: 0%;
-      background:
-        linear-gradient(180deg,
-          var(--c) 0%,
-          color-mix(in srgb, var(--c) 75%, var(--c-deep)) 35%,
-          var(--c-deep) 100%);
-      border-radius: 9px;
+      border-radius: 5px;
+      background: linear-gradient(180deg,
+        var(--c) 0%,
+        color-mix(in srgb, var(--c) 75%, var(--c-deep)) 40%,
+        var(--c-deep) 100%);
       transition: height 0.85s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
-      z-index: 2;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
     }
 
-    /* Meniscus — bright pulsing edge */
+    /* Meniscus glow */
     .gauge__fill::before {
       content: '';
       position: absolute;
-      top: -7px; left: -130%; right: -130%;
-      height: 16px;
+      top: -8px; left: -300%; right: -300%;
+      height: 18px;
       background: radial-gradient(ellipse at center,
         var(--c) 0%,
         var(--c-glow) 35%,
         transparent 70%);
-      filter: blur(2.5px);
+      filter: blur(3px);
       animation: pulse 2.6s ease-in-out infinite;
       pointer-events: none;
     }
@@ -227,20 +112,20 @@
       top: -1px; left: 0; right: 0;
       height: 2px;
       background: var(--c);
-      box-shadow: 0 0 6px var(--c), 0 0 14px var(--c-glow);
-      pointer-events: none;
+      box-shadow: 0 0 5px var(--c), 0 0 12px var(--c-glow);
     }
     @keyframes pulse {
-      0%, 100% { opacity: 0.8; }
+      0%, 100% { opacity: 0.85; }
       50%      { opacity: 1; }
     }
 
-    /* Record marker — hairline with chevron */
+    /* Record marker */
     .gauge__rec {
       position: absolute;
       left: -3px; right: -3px;
       height: 1px;
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.75);
+      box-shadow: 0 0 4px rgba(255,255,255,0.5);
       transition: bottom 0.55s ease;
       z-index: 3;
       pointer-events: none;
@@ -252,340 +137,176 @@
       width: 0; height: 0;
       border-top: 3px solid transparent;
       border-bottom: 3px solid transparent;
-      border-left: 4px solid rgba(255,255,255,0.85);
+      border-left: 4px solid rgba(255,255,255,0.9);
     }
 
-    /* --- Readout column --- */
-    .readout {
-      flex: 1;
-      min-width: 0;
+    /* ===== Text column ===== */
+    .info {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
+      align-items: flex-start;
+      min-width: 60px;
     }
 
-    .read-label {
+    .info__top {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .info__name {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+      color: var(--c);
+      text-shadow: var(--shadow);
+      font-variation-settings: "opsz" 144;
+      white-space: nowrap;
+    }
+    .info__num {
+      font-family: 'Antonio', sans-serif;
+      font-weight: 300;
+      font-size: 44px;
+      line-height: 0.85;
+      color: #fff;
+      letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+      margin-top: 1px;
+    }
+    .info__num--small { font-size: 34px; }
+    .info__unit {
       font-family: 'JetBrains Mono', monospace;
       font-size: 7px;
       font-weight: 500;
       letter-spacing: 0.25em;
-      color: var(--text-faint);
-      margin-bottom: 2px;
+      color: rgba(255,255,255,0.75);
+      text-shadow: var(--shadow);
+      margin-top: 1px;
     }
 
-    .read-num {
-      font-family: 'Antonio', sans-serif;
-      font-weight: 300;
-      font-size: 48px;
-      line-height: 0.82;
-      color: var(--c);
-      letter-spacing: -0.025em;
-      font-variant-numeric: tabular-nums;
-      text-shadow: 0 0 20px color-mix(in srgb, var(--c) 28%, transparent);
-    }
-    .read-num--small { font-size: 38px; }
-
-    .read-unit {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
-      font-weight: 500;
-      letter-spacing: 0.22em;
-      color: var(--text-dim);
-      margin-top: 2px;
-    }
-
-    .read-peak {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      color: var(--text-faint);
-      margin-top: 9px;
+    .info__bot {
       display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-    .read-peak strong {
-      font-family: 'Antonio', sans-serif;
-      font-weight: 400;
-      font-size: 12px;
-      color: var(--text);
-      letter-spacing: 0;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* Vertical editorial label */
-    .read-vlabel {
-      position: absolute;
-      right: -2px;
-      bottom: 0;
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 400;
-      font-size: 7px;
-      letter-spacing: 0.45em;
-      color: var(--text-faint);
-      text-transform: uppercase;
-    }
-
-    /* ========== FOOT ========== */
-    .foot {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px solid var(--frame);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .falls {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
-      font-weight: 500;
-      letter-spacing: 0.16em;
-      color: var(--text-dim);
-      display: flex;
-      gap: 4px;
-      align-items: baseline;
-    }
-    .falls strong {
-      font-family: 'Antonio', sans-serif;
-      font-weight: 400;
-      font-size: 11px;
-      color: var(--text);
-      font-variant-numeric: tabular-nums;
-    }
-    .status {
+      flex-direction: column;
+      gap: 2px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 7px;
       font-weight: 500;
       letter-spacing: 0.18em;
-      color: var(--text-faint);
-      display: flex;
-      gap: 4px;
-      align-items: center;
-    }
-    .led {
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: #ef4444;
-      box-shadow: 0 0 4px rgba(239,68,68,0.7);
-    }
-    .led--on {
-      background: var(--c);
-      box-shadow: 0 0 5px var(--c), 0 0 10px var(--c-glow);
-      animation: blink 2.4s ease-in-out infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      55%      { opacity: 0.45; }
-    }
-
-    /* ========== CENTER (dual mode) ========== */
-    .center {
-      align-self: stretch;
-      width: 38px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 24px 0 20px;
-    }
-    .center__vs {
-      font-family: 'Fraunces', serif;
-      font-style: italic;
-      font-weight: 400;
-      font-size: 9px;
-      letter-spacing: 0.45em;
-      color: var(--text-faint);
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
       text-transform: uppercase;
     }
-    .center__bar {
-      width: 1px;
-      flex: 1;
-      background: linear-gradient(180deg, transparent, var(--frame) 30%, var(--frame) 70%, transparent);
-      margin: 6px 0;
+    .info__peak {
+      color: rgba(255,255,255,0.75);
+      text-shadow: var(--shadow);
     }
-    .center__delta {
+    .info__peak strong {
       font-family: 'Antonio', sans-serif;
-      font-weight: 300;
-      font-size: 16px;
-      color: var(--text-dim);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
-      transition: color 0.4s ease;
+      font-weight: 400;
+      font-size: 11px;
+      color: #fff;
+      letter-spacing: 0;
+      margin-left: 2px;
     }
-    .center__lead {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 6px;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      color: var(--text-faint);
-      text-transform: uppercase;
-      margin-top: 3px;
-      transition: color 0.4s ease;
+    .info__falls {
+      color: rgba(255,255,255,0.55);
+      text-shadow: var(--shadow);
+    }
+    .info__falls strong {
+      font-family: 'Antonio', sans-serif;
+      font-weight: 400;
+      font-size: 10px;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0;
+      margin-right: 2px;
     }
 
-    /* ========== FLASHES ========== */
+    /* ===== Animations ===== */
     @keyframes leadEnter {
-      0%   { opacity: 0; transform: translateY(-10px); letter-spacing: 0.4em; }
-      18%  { opacity: 1; transform: translateY(0); letter-spacing: 0.3em; }
+      0%   { opacity: 0; transform: translateY(-8px); }
+      18%  { opacity: 1; transform: translateY(0); }
       82%  { opacity: 1; }
       100% { opacity: 0; transform: translateY(-4px); }
     }
     .lead-flash {
       position: fixed;
-      top: 6px; left: 0; right: 0;
+      top: 4px; left: 0; right: 0;
       text-align: center;
       font-family: 'Fraunces', serif;
       font-style: italic;
       font-weight: 400;
-      font-size: 13px;
+      font-size: 11px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       pointer-events: none;
-      animation: leadEnter 3.2s ease forwards;
+      animation: leadEnter 3s ease forwards;
       z-index: 999;
     }
 
-    @keyframes fallShake {
+    @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      18%      { transform: translateX(-3px); }
-      36%      { transform: translateX(3px); }
-      54%      { transform: translateX(-2px); }
-      72%      { transform: translateX(2px); }
-      88%      { transform: translateX(-1px); }
+      20%      { transform: translateX(-2px); }
+      40%      { transform: translateX(2px); }
+      60%      { transform: translateX(-1px); }
+      80%      { transform: translateX(1px); }
     }
-    .card.shaking { animation: fallShake 0.5s ease; }
-
-    @keyframes fallEnter {
-      0%   { opacity: 0; transform: translateX(-50%) translateY(-4px); }
-      18%  { opacity: 1; transform: translateX(-50%) translateY(0); }
-      80%  { opacity: 1; }
-      100% { opacity: 0; transform: translateX(-50%) translateY(2px); }
-    }
-    .fall-flash {
-      position: absolute;
-      top: 26px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
-      color: #ef4444;
-      text-transform: uppercase;
-      pointer-events: none;
-      animation: fallEnter 2s ease forwards;
-      z-index: 10;
-      text-shadow: 0 0 10px rgba(239,68,68,0.7);
-    }
+    .player.shaking { animation: shake 0.4s ease; }
 
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<div class="stage" id="stage">
-
   <!-- ── PLAYER A ── -->
-  <div class="card" data-player="a" id="card-a">
-    <div class="head">
-      <div class="head__name" id="name-a">Matteo</div>
-      <div class="head__id">P—01</div>
-    </div>
-    <div class="rule"></div>
-
-    <div class="body">
-      <div class="gauge">
-        <div class="gauge__track">
-          <div class="gauge__fill" id="fill-a" style="height:0%"></div>
-          <div class="gauge__rec" id="rec-a" style="bottom:0%"></div>
-        </div>
+  <div class="player" data-p="a" id="p-a">
+    <div class="gauge">
+      <div class="gauge__track">
+        <div class="gauge__fill" id="fill-a" style="height:0%"></div>
       </div>
-      <div class="readout">
-        <div>
-          <div class="read-label">ALTITUDE</div>
-          <div class="read-num" id="num-a">0</div>
-          <div class="read-unit">METRES</div>
-          <div class="read-peak">PEAK <strong id="peak-a">0</strong></div>
-        </div>
-        <div class="read-vlabel">Baby Steps</div>
+      <div class="gauge__rec" id="rec-a" style="bottom:0%"></div>
+    </div>
+    <div class="info">
+      <div class="info__top">
+        <div class="info__name" id="name-a">Matteo</div>
+        <div class="info__num" id="num-a">0</div>
+        <div class="info__unit">METRES</div>
+      </div>
+      <div class="info__bot">
+        <div class="info__peak">peak<strong id="peak-a">0</strong></div>
+        <div class="info__falls"><strong id="falls-a">00</strong>falls</div>
       </div>
     </div>
-
-    <div class="foot">
-      <div class="falls">FALLS <strong id="falls-a">00</strong></div>
-      <div class="status"><span class="led led--on" id="led-a"></span><span id="stat-a">LIVE</span></div>
-    </div>
-  </div>
-
-  <!-- ── CENTER (dual mode) ── -->
-  <div class="center" id="center">
-    <div class="center__vs">vs</div>
-    <div class="center__bar"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
-      <div class="center__delta" id="delta">—</div>
-      <div class="center__lead" id="leader">tie</div>
-    </div>
-    <div class="center__bar"></div>
-    <div class="center__vs">δ m</div>
   </div>
 
   <!-- ── PLAYER B ── -->
-  <div class="card" data-player="b" id="card-b">
-    <div class="head">
-      <div class="head__name" id="name-b">Abdou</div>
-      <div class="head__id">P—02</div>
-    </div>
-    <div class="rule"></div>
-
-    <div class="body">
-      <div class="gauge">
-        <div class="gauge__track">
-          <div class="gauge__fill" id="fill-b" style="height:0%"></div>
-          <div class="gauge__rec" id="rec-b" style="bottom:0%"></div>
-        </div>
+  <div class="player" data-p="b" id="p-b">
+    <div class="gauge">
+      <div class="gauge__track">
+        <div class="gauge__fill" id="fill-b" style="height:0%"></div>
       </div>
-      <div class="readout">
-        <div>
-          <div class="read-label">ALTITUDE</div>
-          <div class="read-num" id="num-b">0</div>
-          <div class="read-unit">METRES</div>
-          <div class="read-peak">PEAK <strong id="peak-b">0</strong></div>
-        </div>
-        <div class="read-vlabel">Baby Steps</div>
-      </div>
+      <div class="gauge__rec" id="rec-b" style="bottom:0%"></div>
     </div>
-
-    <div class="foot">
-      <div class="falls">FALLS <strong id="falls-b">00</strong></div>
-      <div class="status"><span class="led led--on" id="led-b"></span><span id="stat-b">LIVE</span></div>
+    <div class="info">
+      <div class="info__top">
+        <div class="info__name" id="name-b">Abdou</div>
+        <div class="info__num" id="num-b">0</div>
+        <div class="info__unit">METRES</div>
+      </div>
+      <div class="info__bot">
+        <div class="info__peak">peak<strong id="peak-b">0</strong></div>
+        <div class="info__falls"><strong id="falls-b">00</strong>falls</div>
+      </div>
     </div>
   </div>
 
-</div>
-
 <script>
-  // =========================================================================
-  //  STATE
-  // =========================================================================
   const params      = new URLSearchParams(window.location.search);
-  const SOLO_PLAYER = params.get('player'); // 'playerA' | 'playerB' | null
+  const SOLO_PLAYER = params.get('player');
   const MAX_H       = 1200;
 
-  // Solo mode — hide other card + center
-  if (SOLO_PLAYER === 'playerA') {
-    el('card-b').classList.add('hidden');
-    el('center').classList.add('hidden');
-  } else if (SOLO_PLAYER === 'playerB') {
-    el('card-a').classList.add('hidden');
-    el('center').classList.add('hidden');
-  }
+  if (SOLO_PLAYER === 'playerA') el('p-b').classList.add('hidden');
+  else if (SOLO_PLAYER === 'playerB') el('p-a').classList.add('hidden');
 
   const socket = io(window.location.origin);
   socket.on('state_sync', applyState);
@@ -605,7 +326,6 @@
     setText('falls-a', String(a.falls).padStart(2, '0'));
     setText('falls-b', String(b.falls).padStart(2, '0'));
 
-    // Shared scale across both players for fair comparison
     const top   = Math.max(a.height, b.height, a.maxHeight, b.maxHeight, 1);
     const scale = Math.max(top * 1.05, MAX_H * 0.08);
 
@@ -613,86 +333,39 @@
     el('fill-b').style.height = pct(b.height,    scale) + '%';
     el('rec-a').style.bottom  = pct(a.maxHeight, scale) + '%';
     el('rec-b').style.bottom  = pct(b.maxHeight, scale) + '%';
-
-    setOnline('led-a', 'stat-a', a.online);
-    setOnline('led-b', 'stat-b', b.online);
-
-    // Center diff
-    const diff   = a.height - b.height;
-    const deltaE = el('delta');
-    const leadE  = el('leader');
-    if (deltaE && leadE) {
-      const abs = Math.abs(Math.round(diff));
-      if (abs === 0) {
-        deltaE.textContent  = '0';
-        deltaE.style.color  = 'var(--text-dim)';
-        leadE.textContent   = 'tied';
-        leadE.style.color   = 'var(--text-faint)';
-      } else if (diff > 0) {
-        deltaE.textContent  = '+' + abs;
-        deltaE.style.color  = 'var(--a)';
-        leadE.textContent   = (a.name || 'Matteo').slice(0, 8);
-        leadE.style.color   = 'var(--a)';
-      } else {
-        deltaE.textContent  = '+' + abs;
-        deltaE.style.color  = 'var(--b)';
-        leadE.textContent   = (b.name || 'Abdou').slice(0, 8);
-        leadE.style.color   = 'var(--b)';
-      }
-    }
   }
 
   function flashLead(leader, state) {
     if (SOLO_PLAYER && SOLO_PLAYER !== leader) return;
     if (leader === 'tie') return;
-
-    const name  = leader === 'playerA'
-      ? (state.playerA.name || 'Matteo')
-      : (state.playerB.name || 'Abdou');
+    const name  = leader === 'playerA' ? (state.playerA.name || 'Matteo') : (state.playerB.name || 'Abdou');
     const color = leader === 'playerA' ? '#67e8f9' : '#fbbf24';
-    const glow  = leader === 'playerA'
-      ? 'rgba(103,232,249,0.55)'
-      : 'rgba(251,191,36,0.55)';
-
+    const glow  = leader === 'playerA' ? 'rgba(103,232,249,0.55)' : 'rgba(251,191,36,0.55)';
     const d = document.createElement('div');
-    d.className     = 'lead-flash';
-    d.style.color   = color;
-    d.style.textShadow = '0 0 22px ' + glow + ', 0 2px 12px rgba(0,0,0,0.9)';
-    d.textContent   = '↑  ' + name + ' takes the lead';
+    d.className = 'lead-flash';
+    d.style.color = color;
+    d.style.textShadow = '0 0 18px ' + glow + ', 0 2px 10px rgba(0,0,0,0.95)';
+    d.textContent = '↑  ' + name + ' takes the lead';
     document.body.appendChild(d);
-    setTimeout(() => d.remove(), 3300);
+    setTimeout(() => d.remove(), 3100);
   }
 
   function shakeFall(playerId) {
-    const cardId = playerId === 'playerA' ? 'card-a' : 'card-b';
-    const card   = el(cardId);
-    if (!card || card.classList.contains('hidden')) return;
-
-    card.classList.add('shaking');
-    setTimeout(() => card.classList.remove('shaking'), 520);
-
-    const flash = document.createElement('div');
-    flash.className    = 'fall-flash';
-    flash.textContent  = '— fall —';
-    card.appendChild(flash);
-    setTimeout(() => flash.remove(), 2050);
+    const id = playerId === 'playerA' ? 'p-a' : 'p-b';
+    const n = el(id);
+    if (!n) return;
+    n.classList.add('shaking');
+    setTimeout(() => n.classList.remove('shaking'), 420);
   }
 
-  // ── helpers ──
-  function pct(v, m)        { return Math.min(100, Math.max(0, (v / m) * 100)).toFixed(2); }
-  function el(id)           { return document.getElementById(id); }
-  function setText(id, t)   { const n = el(id); if (n) n.textContent = t; }
+  function pct(v, m)      { return Math.min(100, Math.max(0, (v / m) * 100)).toFixed(2); }
+  function el(id)         { return document.getElementById(id); }
+  function setText(id, t) { const n = el(id); if (n) n.textContent = t; }
   function setNum(id, v) {
     const n = el(id); if (!n) return;
-    const rounded = Math.round(v);
-    n.textContent = rounded;
-    // Shrink font when number gets long (4+ digits)
-    n.classList.toggle('read-num--small', String(rounded).length >= 4);
-  }
-  function setOnline(ledId, statId, on) {
-    const led = el(ledId), stat = el(statId);
-    if (led)  led.className  = 'led ' + (on ? 'led--on' : '');
-    if (stat) stat.textContent = on ? 'LIVE' : 'OFF';
+    const r = Math.round(v);
+    n.textContent = r;
+    n.classList.toggle('info__num--small', String(r).length >= 4);
   }
 </script>
 </body>
