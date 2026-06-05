@@ -300,7 +300,7 @@
     .falls__row {
       display: flex;
       align-items: baseline;
-      gap: 14px;
+      gap: 8px;
     }
     .falls__num {
       font-family: 'Big Shoulders Display', sans-serif;
@@ -312,21 +312,20 @@
       font-variant-numeric: tabular-nums;
       text-shadow: var(--shadow);
     }
-    .falls__skull {
-      font-size: 60px;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9));
-    }
-    .falls__label {
+    .falls__unit {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 30px;
+      font-size: 56px;
       font-weight: 700;
       color: var(--c);
-      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
-      margin-top: 4px;
+      text-shadow: var(--shadow), 0 0 16px var(--c-glow);
     }
-    .falls__label strong {
+    .falls__label {
       font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
       font-weight: 800;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 12px var(--c-glow);
+      margin-top: 4px;
     }
 
     /* =========================================================================
@@ -586,10 +585,10 @@
   <div class="falls__avatar"><img id="falls-img" alt=""></div>
   <div class="falls__info">
     <div class="falls__row">
-      <span class="falls__skull">💀</span>
       <span class="falls__num" id="falls-num">0</span>
+      <span class="falls__unit">chutes</span>
     </div>
-    <div class="falls__label">chutes de <strong id="falls-name">tvabdou</strong></div>
+    <div class="falls__label" id="falls-name">tvabdou</div>
   </div>
 </div>
 
