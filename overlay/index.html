@@ -6,7 +6,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=JetBrains+Mono:wght@500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     /* =========================================================================
@@ -102,14 +102,13 @@
       text-shadow: var(--shadow), 0 0 14px var(--c-glow);
     }
     .duo .info__name {
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 36px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      color: rgba(255,255,255,0.92);
-      text-shadow: var(--shadow);
-      margin-top: 6px;
-      text-transform: lowercase;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
+      margin-top: 8px;
     }
 
     /* =========================================================================
@@ -154,13 +153,13 @@
       text-shadow: var(--shadow), 0 0 16px var(--c-glow);
     }
     .solo .info__name {
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 44px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.92);
-      text-shadow: var(--shadow);
-      margin-top: 8px;
-      text-transform: lowercase;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 16px var(--c-glow);
+      margin-top: 10px;
     }
     /* Solo stats panel — two cells separated by a thin divider */
     .solo .info__meta {
@@ -574,14 +573,26 @@
     .delta.tied   .delta__unit { color: rgba(255,255,255,0.4); }
 
     .delta__label {
-      font-family: 'Big Shoulders Display', sans-serif;
+      font-family: 'Montserrat', sans-serif;
       font-weight: 700;
-      font-size: 22px;
-      letter-spacing: 0.02em;
-      color: rgba(255,255,255,0.92);
-      text-transform: lowercase;
+      font-size: 18px;
+      letter-spacing: -0.005em;
+      color: rgba(255,255,255,0.85);
       text-shadow: var(--shadow);
     }
+    /* Le pseudo de l'adversaire dans le label, en couleur */
+    .delta.ahead .delta__label-opp,
+    .delta.behind .delta__label-opp,
+    .delta.tied .delta__label-opp {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+    }
+    .delta.ahead  .delta__label-opp { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
+    .delta.behind .delta__label-opp { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
+    .delta.tied   .delta__label-opp { color: rgba(255,255,255,0.85); }
+    /* Si je suis B, l'adversaire est A (cyan) */
+    .delta[data-me="b"].ahead  .delta__label-opp { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
+    .delta[data-me="b"].behind .delta__label-opp { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
 
     /* ========== FLASH + SHAKE ========== */
     @keyframes leadEnter {
@@ -831,22 +842,26 @@
       const sign  = document.getElementById('delta-sign');
       const label = document.getElementById('delta-label');
 
+      root.dataset.me = isA ? 'a' : 'b';
       root.classList.remove('ahead', 'behind', 'tied');
+
+      const oppSpan = '<span class="delta__label-opp">' + oppN + '</span>';
+
       if (diff === 0) {
         root.classList.add('tied');
         sign.textContent = '=';
         setNumSmooth('delta-num', 0);
-        label.textContent = 'égalité avec ' + oppN;
+        label.innerHTML = 'égalité avec ' + oppSpan;
       } else if (diff > 0) {
         root.classList.add('ahead');
         sign.textContent = '+';
         setNumSmooth('delta-num', diff);
-        label.textContent = "d'avance sur " + oppN;
+        label.innerHTML = "d'avance sur " + oppSpan;
       } else {
         root.classList.add('behind');
         sign.textContent = '−';
         setNumSmooth('delta-num', Math.abs(diff));
-        label.textContent = 'de retard sur ' + oppN;
+        label.innerHTML = 'de retard sur ' + oppSpan;
       }
     }
 
