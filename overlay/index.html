@@ -581,19 +581,13 @@
       color: rgba(255,255,255,0.85);
       text-shadow: var(--shadow);
     }
-    /* Le pseudo de l'adversaire dans le label, en couleur */
-    .delta.ahead .delta__label-opp,
-    .delta.behind .delta__label-opp,
-    .delta.tied .delta__label-opp {
+    /* Pseudo adversaire en blanc - une seule couleur d'accent (celle du viewer) */
+    .delta__label-opp {
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
+      color: #fff;
+      text-shadow: var(--shadow);
     }
-    .delta.ahead  .delta__label-opp { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
-    .delta.behind .delta__label-opp { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
-    .delta.tied   .delta__label-opp { color: rgba(255,255,255,0.85); }
-    /* Si je suis B, l'adversaire est A (cyan) */
-    .delta[data-me="b"].ahead  .delta__label-opp { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
-    .delta[data-me="b"].behind .delta__label-opp { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
 
     /* ========== FLASH + SHAKE ========== */
     @keyframes leadEnter {
