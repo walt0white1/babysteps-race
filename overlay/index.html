@@ -473,39 +473,39 @@
     }
 
     /* ── Transition vers le winner ───────────────────────────────────── */
-    .vs__player { transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
+    /* Le perdant: fade out + collapse de l'espace flex */
     .vs__player.vs--lose {
-      animation: vsLose 0.8s ease forwards;
+      animation: vsLose 0.7s ease forwards;
+      overflow: hidden;
     }
     @keyframes vsLose {
-      0%   { opacity: 1; transform: scale(1) translateY(0); }
-      100% { opacity: 0; transform: scale(0.5) translateY(40px); filter: blur(8px); }
+      0%   { opacity: 1; max-width: 500px; margin: 0; transform: scale(1); filter: blur(0); }
+      40%  { opacity: 0; transform: scale(0.7); filter: blur(6px); }
+      100% { opacity: 0; max-width: 0;   margin: 0 -50px; transform: scale(0.4); filter: blur(8px); }
     }
 
+    /* Le gagnant: scale up centre (le flex le recentre grace au collapse du loser) */
     .vs__player.vs--win {
-      animation: vsWin 1s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      position: relative;
+      animation: vsWin 0.9s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
     @keyframes vsWin {
       from { transform: scale(1); }
-      to   { transform: scale(1.35); }
+      to   { transform: scale(1.4); }
     }
 
-    /* Couronne qui tombe du ciel sur le gagnant */
-    .vs__player.vs--win::before {
-      content: '👑';
-      position: absolute;
-      top: -68px;
-      left: 50%;
-      font-size: 56px;
-      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.7));
-      animation: crownDrop 0.7s 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    /* Halo soft autour du gagnant */
+    .vs__player.vs--win .vs__avatar {
+      animation: vsHalo 0.8s 0.6s ease forwards;
     }
-    @keyframes crownDrop {
-      0%   { opacity: 0; transform: translateX(-50%) translateY(-60px) rotate(-30deg); }
-      60%  { opacity: 1; transform: translateX(-50%) translateY(8px) rotate(15deg); }
-      100% { opacity: 1; transform: translateX(-50%) translateY(0) rotate(0); }
+    @keyframes vsHalo {
+      to {
+        box-shadow:
+          0 0 0 4px rgba(255,255,255,0.9),
+          0 0 30px rgba(255,255,255,0.5),
+          0 0 60px rgba(255,255,255,0.25),
+          0 10px 32px rgba(0,0,0,0.85);
+      }
     }
 
     /* ========== FLASH + SHAKE ========== */
