@@ -415,6 +415,136 @@
       margin-top: 2px;
     }
 
+    /* =========================================================================
+       STYLE: VS — dramatic versus screen (intermede)
+       2 grands PPs face-a-face, "VS" central, chiffres qui montent dramatiquement
+       ========================================================================= */
+    .vs {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 30px;
+      max-width: 900px;
+    }
+
+    .vs__player {
+      --c:      var(--a);
+      --c-glow: var(--a-glow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      animation: vsSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+    .vs__player--a { animation-delay: 0.1s; }
+    .vs__player--b {
+      --c: var(--b);
+      --c-glow: var(--b-glow);
+      animation-name: vsSlideInR;
+      animation-delay: 0.1s;
+    }
+    @keyframes vsSlideIn {
+      from { opacity: 0; transform: translateX(-60px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes vsSlideInR {
+      from { opacity: 0; transform: translateX(60px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .vs__avatar {
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      position: relative;
+      background: rgba(0,0,0,0.5);
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.4),
+        0 0 0 6px var(--c),
+        0 0 30px var(--c-glow),
+        0 12px 40px rgba(0,0,0,0.8);
+    }
+    .vs__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+    .vs__name {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 32px;
+      letter-spacing: 0.02em;
+      color: #fff;
+      text-shadow: var(--shadow), 0 0 20px var(--c-glow);
+      text-transform: lowercase;
+      line-height: 1;
+    }
+
+    .vs__alt {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 88px;
+      line-height: 0.82;
+      color: #fff;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+    }
+    .vs__alt small {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--c);
+      margin-left: 4px;
+      text-shadow: var(--shadow), 0 0 18px var(--c-glow);
+    }
+
+    /* Center VS divider */
+    .vs__center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: vsZoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s backwards;
+    }
+    @keyframes vsZoomIn {
+      from { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    .vs__label {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 92px;
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, var(--a) 0%, #fff 50%, var(--b) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 28px rgba(255,255,255,0.18);
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.7));
+    }
+
+    .vs__leader {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      text-shadow: var(--shadow);
+      white-space: nowrap;
+      animation: vsFadeIn 0.6s ease 1.3s backwards;
+    }
+    .vs__leader strong {
+      font-weight: 900;
+      color: #fff;
+      margin-left: 4px;
+    }
+    .vs__leader.is-a strong { color: var(--a); text-shadow: 0 0 14px var(--a-glow); }
+    .vs__leader.is-b strong { color: var(--b); text-shadow: 0 0 14px var(--b-glow); }
+    @keyframes vsFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     /* ========== FLASH + SHAKE ========== */
     @keyframes leadEnter {
       0%   { opacity: 0; transform: translateY(-6px); }
@@ -500,6 +630,24 @@
   </div>
 </div>
 
+<!-- ── VS ── -->
+<div class="vs hidden" id="vs">
+  <div class="vs__player vs__player--a">
+    <div class="vs__avatar"><img id="vs-img-a" alt=""></div>
+    <div class="vs__name" id="vs-name-a">el_matte0</div>
+    <div class="vs__alt"><span id="vs-num-a">0</span><small>m</small></div>
+  </div>
+  <div class="vs__center">
+    <div class="vs__label">VS</div>
+    <div class="vs__leader" id="vs-leader">— en jeu —</div>
+  </div>
+  <div class="vs__player vs__player--b">
+    <div class="vs__avatar"><img id="vs-img-b" alt=""></div>
+    <div class="vs__name" id="vs-name-b">tvabdou</div>
+    <div class="vs__alt"><span id="vs-num-b">0</span><small>m</small></div>
+  </div>
+</div>
+
 <!-- ── BANNER ── -->
 <div class="banner hidden" id="banner">
   <div class="banner__side banner__side--a">
@@ -548,6 +696,7 @@
   document.getElementById('solo').classList.toggle('hidden',     STYLE !== 'solo');
   document.getElementById('scorebug').classList.toggle('hidden', STYLE !== 'scorebug');
   document.getElementById('banner').classList.toggle('hidden',   STYLE !== 'banner');
+  document.getElementById('vs').classList.toggle('hidden',       STYLE !== 'vs');
 
   // Solo: choose player A or B
   if (STYLE === 'solo') {
@@ -558,13 +707,14 @@
   // =========================================================================
   // LOAD TWITCH AVATARS (in 600x600 for HiDPI)
   // =========================================================================
-  loadTwitchAvatar(TWITCH_A, ['duo-img-a', 'sb-img-a', 'bn-img-a', STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null]);
-  loadTwitchAvatar(TWITCH_B, ['duo-img-b', 'sb-img-b', 'bn-img-b', STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null]);
+  loadTwitchAvatar(TWITCH_A, ['duo-img-a', 'sb-img-a', 'bn-img-a', 'vs-img-a', STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null]);
+  loadTwitchAvatar(TWITCH_B, ['duo-img-b', 'sb-img-b', 'bn-img-b', 'vs-img-b', STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null]);
 
   // Set pseudonyms across all layouts
   setText('duo-name-a', TWITCH_A); setText('duo-name-b', TWITCH_B);
   setText('sb-name-a',  TWITCH_A); setText('sb-name-b',  TWITCH_B);
   setText('bn-name-a',  TWITCH_A); setText('bn-name-b',  TWITCH_B);
+  setText('vs-name-a',  TWITCH_A); setText('vs-name-b',  TWITCH_B);
   if (STYLE === 'solo') setText('solo-name', SOLO_PLAYER === 'playerB' ? TWITCH_B : TWITCH_A);
 
   function loadTwitchAvatar(username, imgIds) {
@@ -609,6 +759,18 @@
     // scorebug
     setNumSmooth('sb-num-a', aH);
     setNumSmooth('sb-num-b', bH);
+
+    // vs — counter monte dramatiquement (animation lente au premier load)
+    if (STYLE === 'vs') {
+      setNumSmoothSlow('vs-num-a', aH);
+      setNumSmoothSlow('vs-num-b', bH);
+      const ldr = document.getElementById('vs-leader');
+      if (ldr) {
+        if (aH === bH)      { ldr.className = 'vs__leader';      ldr.textContent = '— égalité —'; }
+        else if (aH > bH)   { ldr.className = 'vs__leader is-a'; ldr.innerHTML  = 'en tête <strong>' + TWITCH_A + '</strong> · +' + (aH - bH) + 'm'; }
+        else                { ldr.className = 'vs__leader is-b'; ldr.innerHTML  = 'en tête <strong>' + TWITCH_B + '</strong> · +' + (bH - aH) + 'm'; }
+      }
+    }
 
     // banner
     setNumSmooth('bn-num-a', aH);
@@ -678,18 +840,26 @@
   // ── Smooth number tween: anime de la valeur actuelle vers la nouvelle ──
   const tweens = {};  // id => {raf, from, to, start}
   const TWEEN_MS = 500;
-  function setNumSmooth(id, target) {
+  function setNumSmooth(id, target) { _tween(id, target, 500); }
+  function setNumSmoothSlow(id, target) {
+    const n = document.getElementById(id);
+    if (!n) return;
+    // Premier appel: animer de 0 vers target en 1.8s (effet dramatique d'entree)
+    const cur = Number(n.textContent.replace(/\D/g, '')) || 0;
+    const dur = (cur === 0 && target > 0) ? 1800 : 500;
+    _tween(id, target, dur);
+  }
+  function _tween(id, target, duration) {
     const n = document.getElementById(id);
     if (!n) return;
     target = Number(target) || 0;
     const current = Number(n.textContent.replace(/\D/g, '')) || 0;
     if (current === target) return;
-
     if (tweens[id]) cancelAnimationFrame(tweens[id].raf);
     const start = performance.now();
     const from  = current;
     const step = (now) => {
-      const t = Math.min(1, (now - start) / TWEEN_MS);
+      const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
       const val = Math.round(from + (target - from) * eased);
       n.textContent = val;
