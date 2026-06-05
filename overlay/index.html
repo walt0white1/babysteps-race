@@ -472,6 +472,42 @@
       text-shadow: 0 4px 10px rgba(0,0,0,0.95);
     }
 
+    /* ── Transition vers le winner ───────────────────────────────────── */
+    .vs__player { transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    .vs__player.vs--lose {
+      animation: vsLose 0.8s ease forwards;
+    }
+    @keyframes vsLose {
+      0%   { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.5) translateY(40px); filter: blur(8px); }
+    }
+
+    .vs__player.vs--win {
+      animation: vsWin 1s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      position: relative;
+    }
+    @keyframes vsWin {
+      from { transform: scale(1); }
+      to   { transform: scale(1.35); }
+    }
+
+    /* Couronne qui tombe du ciel sur le gagnant */
+    .vs__player.vs--win::before {
+      content: '👑';
+      position: absolute;
+      top: -68px;
+      left: 50%;
+      font-size: 56px;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.7));
+      animation: crownDrop 0.7s 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+    @keyframes crownDrop {
+      0%   { opacity: 0; transform: translateX(-50%) translateY(-60px) rotate(-30deg); }
+      60%  { opacity: 1; transform: translateX(-50%) translateY(8px) rotate(15deg); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0) rotate(0); }
+    }
+
     /* ========== FLASH + SHAKE ========== */
     @keyframes leadEnter {
       0%   { opacity: 0; transform: translateY(-6px); }
@@ -680,10 +716,11 @@
     setNumSmooth('sb-num-a', aH);
     setNumSmooth('sb-num-b', bH);
 
-    // vs — counter monte dramatiquement
+    // vs — counter monte dramatiquement puis reveal du gagnant
     if (STYLE === 'vs') {
       setNumSmoothSlow('vs-num-a', aH);
       setNumSmoothSlow('vs-num-b', bH);
+      maybeRevealWinner(aH, bH);
     }
 
     // banner
@@ -750,6 +787,29 @@
   }
 
   function setText(id, t) { const n = document.getElementById(id); if (n) n.textContent = t; }
+
+  // ── Reveal du gagnant (VS style) : appele une seule fois apres l'anim ──
+  let vsRevealed = false;
+  function maybeRevealWinner(aH, bH) {
+    if (vsRevealed) return;
+    if (aH === 0 && bH === 0) return;   // attendre des vraies donnees
+    if (aH === bH) return;              // pas de gagnant si egalite
+    vsRevealed = true;
+
+    // Attendre la fin de l'animation des chiffres (1.8s) + petite pause
+    setTimeout(() => {
+      const playerA = document.querySelector('.vs__player--a');
+      const playerB = document.querySelector('.vs__player--b');
+      if (!playerA || !playerB) return;
+      if (aH > bH) {
+        playerA.classList.add('vs--win');
+        playerB.classList.add('vs--lose');
+      } else {
+        playerB.classList.add('vs--win');
+        playerA.classList.add('vs--lose');
+      }
+    }, 2400);
+  }
 
   // ── Smooth number tween: anime de la valeur actuelle vers la nouvelle ──
   const tweens = {};  // id => {raf, from, to, start}
