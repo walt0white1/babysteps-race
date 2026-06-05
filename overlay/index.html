@@ -416,130 +416,60 @@
     }
 
     /* =========================================================================
-       STYLE: VS — WOW factor (avatars + chiffres geants + effets cosmiques)
+       STYLE: VS — clean, big, punchy
        ========================================================================= */
     .vs {
       display: flex;
       align-items: center;
       gap: 100px;
-      position: relative;
     }
 
     .vs__player {
-      --c:      var(--a);
-      --c-glow: var(--a-glow);
+      --c: var(--a);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 26px;
-      position: relative;
-      animation: vsPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      gap: 28px;
+      animation: vsPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
     }
     .vs__player--b {
       --c: var(--b);
-      --c-glow: var(--b-glow);
-      animation-delay: 0.18s;
+      animation-delay: 0.15s;
     }
     @keyframes vsPop {
-      from { opacity: 0; transform: scale(0.4); }
-      60%  { opacity: 1; transform: scale(1.08); }
+      from { opacity: 0; transform: scale(0.6); }
+      60%  { opacity: 1; transform: scale(1.06); }
       to   { opacity: 1; transform: scale(1); }
     }
 
-    /* Rayons lumineux qui tournent derriere le PP */
-    .vs__avatar-wrap {
-      position: relative;
-      width: 220px; height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .vs__rays {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background:
-        conic-gradient(from 0deg,
-          var(--c-glow) 0deg,
-          transparent 30deg,
-          var(--c-glow) 60deg,
-          transparent 90deg,
-          var(--c-glow) 120deg,
-          transparent 150deg,
-          var(--c-glow) 180deg,
-          transparent 210deg,
-          var(--c-glow) 240deg,
-          transparent 270deg,
-          var(--c-glow) 300deg,
-          transparent 330deg);
-      filter: blur(8px);
-      opacity: 0.45;
-      animation: rayspin 8s linear infinite;
-    }
-    @keyframes rayspin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Aura pulsante */
-    .vs__aura {
-      position: absolute;
-      inset: -20px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--c-glow) 0%, transparent 60%);
-      animation: pulse 2.2s ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(0.92); opacity: 0.6; }
-      50%      { transform: scale(1.08); opacity: 0.9; }
-    }
-
     .vs__avatar {
-      position: relative;
-      width: 170px; height: 170px;
+      width: 180px; height: 180px;
       border-radius: 50%;
       background: rgba(0,0,0,0.5);
-      box-shadow:
-        0 0 0 3px rgba(0,0,0,0.6),
-        0 0 0 5px var(--c),
-        0 0 40px var(--c-glow),
-        0 12px 36px rgba(0,0,0,0.8);
-      z-index: 2;
+      overflow: hidden;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.85), 0 3px 8px rgba(0,0,0,0.6);
     }
-    .vs__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .vs__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
 
-    /* Chiffre avec degrade qui shimmer */
     .vs__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 140px;
+      font-size: 150px;
       line-height: 0.82;
       letter-spacing: -0.04em;
       font-variant-numeric: tabular-nums;
-      background: linear-gradient(180deg,
-        #ffffff 0%,
-        #ffffff 50%,
-        var(--c) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.95)) drop-shadow(0 0 24px var(--c-glow));
-      animation: shimmer 3s ease-in-out infinite;
-    }
-    @keyframes shimmer {
-      0%, 100% { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.95)) drop-shadow(0 0 18px var(--c-glow)); }
-      50%      { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.95)) drop-shadow(0 0 36px var(--c-glow)); }
+      color: #fff;
+      text-shadow:
+        0 4px 10px rgba(0,0,0,0.95),
+        0 0 30px rgba(0,0,0,0.6);
     }
     .vs__alt small {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 70px;
+      font-size: 74px;
       font-weight: 700;
       margin-left: 4px;
-      background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 60%, transparent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 16px var(--c-glow));
+      color: var(--c);
+      text-shadow: 0 4px 10px rgba(0,0,0,0.95);
     }
 
     /* ========== FLASH + SHAKE ========== */
@@ -630,19 +560,11 @@
 <!-- ── VS ── -->
 <div class="vs hidden" id="vs">
   <div class="vs__player vs__player--a">
-    <div class="vs__avatar-wrap">
-      <div class="vs__rays"></div>
-      <div class="vs__aura"></div>
-      <div class="vs__avatar"><img id="vs-img-a" alt=""></div>
-    </div>
+    <div class="vs__avatar"><img id="vs-img-a" alt=""></div>
     <div class="vs__alt"><span id="vs-num-a">0</span><small>m</small></div>
   </div>
   <div class="vs__player vs__player--b">
-    <div class="vs__avatar-wrap">
-      <div class="vs__rays"></div>
-      <div class="vs__aura"></div>
-      <div class="vs__avatar"><img id="vs-img-b" alt=""></div>
-    </div>
+    <div class="vs__avatar"><img id="vs-img-b" alt=""></div>
     <div class="vs__alt"><span id="vs-num-b">0</span><small>m</small></div>
   </div>
 </div>
