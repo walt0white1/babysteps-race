@@ -780,15 +780,19 @@
   // =========================================================================
   // LOAD TWITCH AVATARS (in 600x600 for HiDPI)
   // =========================================================================
+  // Pour delta on charge le PP de l'adversaire selon le viewer
+  const viewerIsA = (SOLO_PLAYER || 'playerA') === 'playerA';
+  const needsDelta = STYLE === 'delta' || CYCLE;
+
   loadTwitchAvatar(TWITCH_A, [
     'duo-img-a', 'sb-img-a', 'bn-img-a', 'vs-img-a',
-    STYLE === 'solo'  && SOLO_PLAYER === 'playerA' ? 'solo-img'  : null,
-    STYLE === 'delta' && SOLO_PLAYER === 'playerB' ? 'delta-pp' : null   // PP de l'adversaire (A)
+    STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null,
+    needsDelta && !viewerIsA ? 'delta-pp' : null   // viewer est B donc opposant = A
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'sb-img-b', 'bn-img-b', 'vs-img-b',
-    STYLE === 'solo'  && SOLO_PLAYER === 'playerB' ? 'solo-img'  : null,
-    STYLE === 'delta' && (SOLO_PLAYER || 'playerA') === 'playerA' ? 'delta-pp' : null   // PP de l'adversaire (B par defaut)
+    STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null,
+    needsDelta && viewerIsA ? 'delta-pp' : null    // viewer est A donc opposant = B
   ]);
 
   // Set pseudonyms across all layouts
