@@ -12,10 +12,16 @@
     /* =========================================================================
        BABY STEPS — MULTI-STYLE OVERLAY
        Styles available via ?style= param:
-         duo       - 2 avatars + altitudes (default)
-         solo      - single player big showcase
-         delta     - perspective view (ahead/behind)
-         vs        - dramatic VS screen with winner reveal
+         duo       - 2 avatars + altitudes (default, vue comparative)
+         opp       - adversaire seul (gros PP + altitude) — perspective stream
+         falls     - nombre de chutes de l'adversaire — perspective stream
+         delta     - "+X m d'avance sur Y" — perspective stream
+         solo      - 1 joueur showcase (alt + peak + falls)
+         vs        - VS dramatique avec reveal du gagnant
+
+       Perspective (perspective stream) = montre les data de l'adversaire.
+       Le streamer indique son cote via ?player=playerA ou ?player=playerB.
+       Sans ?player=, default = playerA (Matteo).
        Solo mode also activates with ?player=playerA or playerB
        ========================================================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -217,6 +223,110 @@
       width: 1px;
       height: 38px;
       background: linear-gradient(180deg, transparent, rgba(255,255,255,0.18), transparent);
+    }
+
+    /* =========================================================================
+       STYLE: OPP — adversaire seul (PP + altitude geante)
+       ========================================================================= */
+    .opp {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      --c: var(--a);
+      --c-glow: var(--a-glow);
+    }
+    .opp[data-p="b"] { --c: var(--b); --c-glow: var(--b-glow); }
+
+    .opp__avatar {
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .opp__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+    .opp__info { display: flex; flex-direction: column; }
+    .opp__alt {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 110px;
+      line-height: 0.82;
+      color: #fff;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+    }
+    .opp__alt small {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--c);
+      margin-left: 4px;
+      text-shadow: var(--shadow), 0 0 16px var(--c-glow);
+    }
+    .opp__name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
+      margin-top: 8px;
+    }
+
+    /* =========================================================================
+       STYLE: FALLS — nombre de chutes de l'adversaire
+       ========================================================================= */
+    .falls {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      --c: var(--a);
+      --c-glow: var(--a-glow);
+    }
+    .falls[data-p="b"] { --c: var(--b); --c-glow: var(--b-glow); }
+
+    .falls__avatar {
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .falls__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+    .falls__info { display: flex; flex-direction: column; }
+    .falls__row {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+    .falls__num {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 130px;
+      line-height: 0.82;
+      color: #fff;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+    }
+    .falls__skull {
+      font-size: 60px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9));
+    }
+    .falls__label {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
+      margin-top: 4px;
+    }
+    .falls__label strong {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
     }
 
     /* =========================================================================
@@ -462,6 +572,27 @@
   </div>
 </div>
 
+<!-- ── OPP : adversaire seul ── -->
+<div class="opp hidden" id="opp">
+  <div class="opp__avatar"><img id="opp-img" alt=""></div>
+  <div class="opp__info">
+    <div class="opp__alt"><span id="opp-num">0</span><small>m</small></div>
+    <div class="opp__name" id="opp-name">tvabdou</div>
+  </div>
+</div>
+
+<!-- ── FALLS : nombre de chutes de l'adversaire ── -->
+<div class="falls hidden" id="falls">
+  <div class="falls__avatar"><img id="falls-img" alt=""></div>
+  <div class="falls__info">
+    <div class="falls__row">
+      <span class="falls__skull">💀</span>
+      <span class="falls__num" id="falls-num">0</span>
+    </div>
+    <div class="falls__label">chutes de <strong id="falls-name">tvabdou</strong></div>
+  </div>
+</div>
+
 <!-- ── DELTA (perspective overlay) ── -->
 <div class="delta hidden tied" id="delta">
   <div class="delta__pp"><img id="delta-pp" alt=""></div>
@@ -507,16 +638,13 @@
   // =========================================================================
   // SHOW THE RIGHT LAYOUT
   // =========================================================================
+  const ALL_OVERLAYS = ['duo','solo','vs','delta','opp','falls'];
   if (CYCLE) {
-    // En mode rotation, on cache tout au depart sauf le premier
-    ['duo','solo','vs','delta'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-    });
+    ALL_OVERLAYS.forEach(id => document.getElementById(id).classList.add('hidden'));
   } else {
-    document.getElementById('duo').classList.toggle('hidden',   STYLE !== 'duo');
-    document.getElementById('solo').classList.toggle('hidden',  STYLE !== 'solo');
-    document.getElementById('vs').classList.toggle('hidden',    STYLE !== 'vs');
-    document.getElementById('delta').classList.toggle('hidden', STYLE !== 'delta');
+    ALL_OVERLAYS.forEach(id => {
+      document.getElementById(id).classList.toggle('hidden', STYLE !== id);
+    });
   }
 
   // Solo: choose player A or B
@@ -528,24 +656,37 @@
   // =========================================================================
   // LOAD TWITCH AVATARS (in 600x600 for HiDPI)
   // =========================================================================
-  // Pour delta on charge le PP de l'adversaire selon le viewer
-  const viewerIsA = (SOLO_PLAYER || 'playerA') === 'playerA';
-  const needsDelta = STYLE === 'delta' || CYCLE;
+  // Perspective: le viewer (le streamer) est playerA par defaut, sinon ?player=playerB
+  const viewerIsA  = (SOLO_PLAYER || 'playerA') === 'playerA';
+  const oppIsA     = !viewerIsA;
+  const oppName    = oppIsA ? TWITCH_A : TWITCH_B;
+  // Pour opp/falls/delta, le PP affiche c'est celui de l'adversaire
+  const needsOppPP = STYLE === 'delta' || STYLE === 'opp' || STYLE === 'falls' || CYCLE;
 
   loadTwitchAvatar(TWITCH_A, [
     'duo-img-a', 'vs-img-a',
     STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null,
-    needsDelta && !viewerIsA ? 'delta-pp' : null   // viewer est B donc opposant = A
+    needsOppPP && oppIsA ? 'delta-pp' : null,
+    needsOppPP && oppIsA ? 'opp-img'   : null,
+    needsOppPP && oppIsA ? 'falls-img' : null
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'vs-img-b',
     STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null,
-    needsDelta && viewerIsA ? 'delta-pp' : null    // viewer est A donc opposant = B
+    needsOppPP && !oppIsA ? 'delta-pp' : null,
+    needsOppPP && !oppIsA ? 'opp-img'   : null,
+    needsOppPP && !oppIsA ? 'falls-img' : null
   ]);
 
   // Set pseudonyms
   setText('duo-name-a', TWITCH_A); setText('duo-name-b', TWITCH_B);
   if (STYLE === 'solo') setText('solo-name', SOLO_PLAYER === 'playerB' ? TWITCH_B : TWITCH_A);
+  // Pour opp/falls le nom affiche est celui de l'adversaire
+  setText('opp-name', oppName);
+  setText('falls-name', oppName);
+  // Couleur dataset pour opp et falls (celle de l'adversaire)
+  document.getElementById('opp').dataset.p   = oppIsA ? 'a' : 'b';
+  document.getElementById('falls').dataset.p = oppIsA ? 'a' : 'b';
 
   function loadTwitchAvatar(username, imgIds) {
     fetch('https://decapi.me/twitch/avatar/' + encodeURIComponent(username))
@@ -589,6 +730,18 @@
       setNumSmooth('solo-num',  toM(p.height));
       setNumSmooth('solo-peak', toM(p.maxHeight));
       setText('solo-falls', p.falls);
+    }
+
+    // opp - altitude de l'adversaire
+    if (STYLE === 'opp') {
+      const opp = oppIsA ? a : b;
+      setNumSmooth('opp-num', toM(opp.height));
+    }
+
+    // falls - nombre de chutes de l'adversaire
+    if (STYLE === 'falls') {
+      const opp = oppIsA ? a : b;
+      setNumSmooth('falls-num', opp.falls);
     }
 
     // vs — counter monte dramatiquement puis reveal du gagnant
@@ -667,9 +820,10 @@
   // ── ROTATION : cycle des overlays automatiquement ──
   let currentStyle = null;
   const cycleSequence = [
-    { id: 'duo',   style: 'duo',   duration: 20000 },
-    { id: 'delta', style: 'delta', duration: 14000 },
-    { id: 'vs',    style: 'vs',    duration: 11000 },
+    { id: 'duo',   style: 'duo',   duration: 18000 },
+    { id: 'opp',   style: 'opp',   duration: 14000 },
+    { id: 'delta', style: 'delta', duration: 12000 },
+    { id: 'falls', style: 'falls', duration: 9000  },
   ];
   let cycleIdx = 0;
 
