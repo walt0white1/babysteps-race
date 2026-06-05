@@ -54,6 +54,19 @@
 
     .hidden { display: none !important; }
 
+    /* ========== ROTATION : fade transitions entre overlays ========== */
+    .cycle-stage {
+      position: relative;
+    }
+    .cycle-stage > * {
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
+    .cycle-stage > .fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     /* =========================================================================
        STYLE: DUO (default) — 2 avatars side by side
        ========================================================================= */
@@ -730,7 +743,8 @@
   // =========================================================================
   const params      = new URLSearchParams(window.location.search);
   const SOLO_PLAYER = params.get('player');         // 'playerA' | 'playerB' | null
-  const STYLE       = params.get('style') || (SOLO_PLAYER ? 'solo' : 'duo');
+  const CYCLE       = params.get('cycle') === '1';  // mode rotation
+  const STYLE       = CYCLE ? 'cycle' : (params.get('style') || (SOLO_PLAYER ? 'solo' : 'duo'));
 
   const TWITCH_A = params.get('twitchA') || 'el_matte0';
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
@@ -743,12 +757,19 @@
   // =========================================================================
   // SHOW THE RIGHT LAYOUT
   // =========================================================================
-  document.getElementById('duo').classList.toggle('hidden',      STYLE !== 'duo');
-  document.getElementById('solo').classList.toggle('hidden',     STYLE !== 'solo');
-  document.getElementById('scorebug').classList.toggle('hidden', STYLE !== 'scorebug');
-  document.getElementById('banner').classList.toggle('hidden',   STYLE !== 'banner');
-  document.getElementById('vs').classList.toggle('hidden',       STYLE !== 'vs');
-  document.getElementById('delta').classList.toggle('hidden',    STYLE !== 'delta');
+  if (CYCLE) {
+    // En mode rotation, on cache tout au depart sauf le premier
+    ['duo','solo','scorebug','banner','vs','delta'].forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
+  } else {
+    document.getElementById('duo').classList.toggle('hidden',      STYLE !== 'duo');
+    document.getElementById('solo').classList.toggle('hidden',     STYLE !== 'solo');
+    document.getElementById('scorebug').classList.toggle('hidden', STYLE !== 'scorebug');
+    document.getElementById('banner').classList.toggle('hidden',   STYLE !== 'banner');
+    document.getElementById('vs').classList.toggle('hidden',       STYLE !== 'vs');
+    document.getElementById('delta').classList.toggle('hidden',    STYLE !== 'delta');
+  }
 
   // Solo: choose player A or B
   if (STYLE === 'solo') {
@@ -794,11 +815,19 @@
   // SOCKET
   // =========================================================================
   const socket = io(window.location.origin);
-  socket.on('state_sync', applyState);
-  socket.on('lead_change', ({ leader, state }) => { applyState(state); flashLead(leader, state); });
+  let lastState = null;
+  socket.on('state_sync', (s) => { lastState = s; applyState(s); });
+  socket.on('lead_change', ({ leader, state }) => { lastState = state; applyState(state); flashLead(leader, state); });
   socket.on('fall', ({ playerId }) => { shakeFall(playerId); });
 
+  // Demarrer la rotation si mode cycle
+  startCycle();
+
+  // Style effectif (rotation ou statique)
+  function activeStyle() { return CYCLE ? (currentStyle || 'duo') : STYLE; }
+
   function applyState(s) {
+    const STYLE = activeStyle();  // override le STYLE static en mode cycle
     const a = s.playerA, b = s.playerB;
     const aH = toM(a.height);
     const bH = toM(b.height);
@@ -924,6 +953,57 @@
   }
 
   function setText(id, t) { const n = document.getElementById(id); if (n) n.textContent = t; }
+
+  // ── ROTATION : cycle des overlays automatiquement ──
+  let currentStyle = null;
+  const cycleSequence = [
+    { id: 'duo',    style: 'duo',    duration: 18000 },
+    { id: 'delta',  style: 'delta',  duration: 12000 },
+    { id: 'vs',     style: 'vs',     duration: 11000 },  // 1s entree + 1.8s tween + 2.4s reveal + 5s pause
+    { id: 'banner', style: 'banner', duration: 14000 },
+  ];
+  let cycleIdx = 0;
+
+  function showOverlayInCycle(item) {
+    const node = document.getElementById(item.id);
+    if (!node) return;
+
+    // Reset VS pour rejouer ses animations
+    if (item.style === 'vs') {
+      vsRevealed = false;
+      const a = document.querySelector('.vs__player--a');
+      const b = document.querySelector('.vs__player--b');
+      if (a) { a.classList.remove('vs--win', 'vs--lose'); a.style.animation = 'none'; a.offsetHeight; a.style.animation = ''; }
+      if (b) { b.classList.remove('vs--win', 'vs--lose'); b.style.animation = 'none'; b.offsetHeight; b.style.animation = ''; }
+      document.getElementById('vs-num-a').textContent = '0';
+      document.getElementById('vs-num-b').textContent = '0';
+    }
+
+    // Mettre a jour le STYLE actif (pour applyState)
+    currentStyle = item.style;
+    node.classList.remove('hidden');
+    // Force un applyState immediat pour remplir les valeurs avec le bon style
+    if (lastState) applyState(lastState);
+  }
+
+  function hideOverlayInCycle(item) {
+    const node = document.getElementById(item.id);
+    if (node) node.classList.add('hidden');
+  }
+
+  function startCycle() {
+    if (!CYCLE) return;
+    const tick = () => {
+      const prev = cycleSequence[(cycleIdx - 1 + cycleSequence.length) % cycleSequence.length];
+      const cur  = cycleSequence[cycleIdx];
+      if (cycleIdx > 0) hideOverlayInCycle(prev);
+      else cycleSequence.forEach(it => hideOverlayInCycle(it));
+      showOverlayInCycle(cur);
+      cycleIdx = (cycleIdx + 1) % cycleSequence.length;
+      setTimeout(tick, cur.duration);
+    };
+    tick();
+  }
 
   // ── Reveal du gagnant (VS style) : appele une seule fois apres l'anim ──
   let vsRevealed = false;
