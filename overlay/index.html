@@ -820,9 +820,6 @@
   socket.on('lead_change', ({ leader, state }) => { lastState = state; applyState(state); flashLead(leader, state); });
   socket.on('fall', ({ playerId }) => { shakeFall(playerId); });
 
-  // Demarrer la rotation si mode cycle
-  startCycle();
-
   // Style effectif (rotation ou statique)
   function activeStyle() { return CYCLE ? (currentStyle || 'duo') : STYLE; }
 
@@ -1004,6 +1001,9 @@
     };
     tick();
   }
+
+  // Demarrer la rotation maintenant que tout est defini
+  startCycle();
 
   // ── Reveal du gagnant (VS style) : appele une seule fois apres l'anim ──
   let vsRevealed = false;
