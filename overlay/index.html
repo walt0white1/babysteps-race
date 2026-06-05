@@ -509,79 +509,78 @@
     }
 
     /* =========================================================================
-       STYLE: DELTA — overlay perspective ("j'ai X m d'avance/retard sur lui")
-       Necessite ?player=playerA ou playerB
+       STYLE: DELTA — DA de base (transparent, sans carte)
+       PP adversaire + arrow + chiffre + label, comme duo style.
        ========================================================================= */
     .delta {
       display: flex;
       align-items: center;
-      gap: 18px;
-      padding: 14px 24px 14px 18px;
-      background: linear-gradient(180deg, rgba(8,11,17,0.92), rgba(4,6,10,0.95));
-      border-radius: 14px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06);
-      position: relative;
-      overflow: hidden;
+      gap: 20px;
     }
-    /* Accent vertical color */
-    .delta::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 4px;
-      background: var(--accent, #64748b);
-      box-shadow: 0 0 14px var(--accent-glow, transparent);
-      transition: background 0.4s, box-shadow 0.4s;
-    }
-    .delta.ahead  { --accent: #22c55e; --accent-glow: rgba(34,197,94,0.5); }
-    .delta.behind { --accent: #ef4444; --accent-glow: rgba(239,68,68,0.5); }
-    .delta.tied   { --accent: #64748b; --accent-glow: transparent; }
 
-    .delta__arrow {
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 64px;
-      font-weight: 900;
-      line-height: 0.85;
-      transition: color 0.4s, text-shadow 0.4s;
-      letter-spacing: -0.05em;
+    /* PP adversaire (meme style que duo) */
+    .delta__pp {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.55);
     }
-    .delta.ahead  .delta__arrow { color: #22c55e; text-shadow: 0 0 18px rgba(34,197,94,0.6); }
-    .delta.behind .delta__arrow { color: #ef4444; text-shadow: 0 0 18px rgba(239,68,68,0.6); }
-    .delta.tied   .delta__arrow { color: rgba(255,255,255,0.4); font-size: 36px; }
+    .delta__pp img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
     .delta__main {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 6px;
     }
+
+    /* Chiffre - meme typo que duo: chiffre blanc + unite color */
+    .delta__row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .delta__sign {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 84px;
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      transition: color 0.4s, text-shadow 0.4s;
+    }
+    .delta.ahead  .delta__sign { color: var(--a); text-shadow: var(--shadow), 0 0 18px var(--a-glow); }
+    .delta.behind .delta__sign { color: var(--b); text-shadow: var(--shadow), 0 0 18px var(--b-glow); }
+    .delta.tied   .delta__sign { color: rgba(255,255,255,0.4); font-size: 60px; }
+
     .delta__num {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 56px;
+      font-size: 84px;
       line-height: 0.85;
       color: #fff;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.035em;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+      text-shadow: var(--shadow);
     }
-    .delta__num small {
+    .delta__unit {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 28px;
+      font-size: 48px;
       font-weight: 700;
-      color: rgba(255,255,255,0.55);
-      margin-left: 2px;
+      line-height: 0.85;
+      transition: color 0.4s, text-shadow 0.4s;
     }
+    .delta.ahead  .delta__unit { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
+    .delta.behind .delta__unit { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
+    .delta.tied   .delta__unit { color: rgba(255,255,255,0.4); }
+
     .delta__label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
-    }
-    .delta__label strong {
-      color: rgba(255,255,255,0.9);
+      font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 700;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      color: rgba(255,255,255,0.92);
+      text-transform: lowercase;
+      text-shadow: var(--shadow);
     }
 
     /* ========== FLASH + SHAKE ========== */
@@ -671,9 +670,13 @@
 
 <!-- ── DELTA (perspective overlay) ── -->
 <div class="delta hidden tied" id="delta">
-  <div class="delta__arrow" id="delta-arrow">=</div>
+  <div class="delta__pp"><img id="delta-pp" alt=""></div>
   <div class="delta__main">
-    <div class="delta__num"><span id="delta-num">0</span><small>m</small></div>
+    <div class="delta__row">
+      <span class="delta__sign" id="delta-sign">=</span>
+      <span class="delta__num" id="delta-num">0</span>
+      <span class="delta__unit">m</span>
+    </div>
     <div class="delta__label" id="delta-label">égalité</div>
   </div>
 </div>
@@ -750,8 +753,16 @@
   // =========================================================================
   // LOAD TWITCH AVATARS (in 600x600 for HiDPI)
   // =========================================================================
-  loadTwitchAvatar(TWITCH_A, ['duo-img-a', 'sb-img-a', 'bn-img-a', 'vs-img-a', STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null]);
-  loadTwitchAvatar(TWITCH_B, ['duo-img-b', 'sb-img-b', 'bn-img-b', 'vs-img-b', STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null]);
+  loadTwitchAvatar(TWITCH_A, [
+    'duo-img-a', 'sb-img-a', 'bn-img-a', 'vs-img-a',
+    STYLE === 'solo'  && SOLO_PLAYER === 'playerA' ? 'solo-img'  : null,
+    STYLE === 'delta' && SOLO_PLAYER === 'playerB' ? 'delta-pp' : null   // PP de l'adversaire (A)
+  ]);
+  loadTwitchAvatar(TWITCH_B, [
+    'duo-img-b', 'sb-img-b', 'bn-img-b', 'vs-img-b',
+    STYLE === 'solo'  && SOLO_PLAYER === 'playerB' ? 'solo-img'  : null,
+    STYLE === 'delta' && (SOLO_PLAYER || 'playerA') === 'playerA' ? 'delta-pp' : null   // PP de l'adversaire (B par defaut)
+  ]);
 
   // Set pseudonyms across all layouts
   setText('duo-name-a', TWITCH_A); setText('duo-name-b', TWITCH_B);
@@ -811,31 +822,31 @@
 
     // delta (perspective overlay)
     if (STYLE === 'delta') {
-      const isA   = (SOLO_PLAYER || 'playerA') === 'playerA';
-      const me    = isA ? aH       : bH;
-      const opp   = isA ? bH       : aH;
-      const oppN  = isA ? TWITCH_B : TWITCH_A;
-      const diff  = me - opp;
+      const isA  = (SOLO_PLAYER || 'playerA') === 'playerA';
+      const me   = isA ? aH       : bH;
+      const opp  = isA ? bH       : aH;
+      const oppN = isA ? TWITCH_B : TWITCH_A;
+      const diff = me - opp;
       const root  = document.getElementById('delta');
-      const arrow = document.getElementById('delta-arrow');
+      const sign  = document.getElementById('delta-sign');
       const label = document.getElementById('delta-label');
 
       root.classList.remove('ahead', 'behind', 'tied');
       if (diff === 0) {
         root.classList.add('tied');
-        arrow.textContent = '=';
+        sign.textContent = '=';
         setNumSmooth('delta-num', 0);
-        label.innerHTML = 'égalité avec <strong>' + oppN + '</strong>';
+        label.textContent = 'égalité avec ' + oppN;
       } else if (diff > 0) {
         root.classList.add('ahead');
-        arrow.textContent = '↑';
+        sign.textContent = '+';
         setNumSmooth('delta-num', diff);
-        label.innerHTML = "d'avance sur <strong>" + oppN + '</strong>';
+        label.textContent = "d'avance sur " + oppN;
       } else {
         root.classList.add('behind');
-        arrow.textContent = '↓';
+        sign.textContent = '−';
         setNumSmooth('delta-num', Math.abs(diff));
-        label.innerHTML = 'de retard sur <strong>' + oppN + '</strong>';
+        label.textContent = 'de retard sur ' + oppN;
       }
     }
 
