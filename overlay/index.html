@@ -278,16 +278,6 @@
     }
     .falls[data-p="b"] { --c: var(--b); --c-glow: var(--b-glow); }
 
-    /* PP adversaire (petit, en coin) */
-    .falls__avatar {
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.4);
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.8);
-    }
-    .falls__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-
     /* Pictogramme chute - image masquee + couleur joueur */
     .falls__icon {
       width: 90px;
@@ -583,7 +573,6 @@
 
 <!-- ── FALLS : nombre de chutes de l'adversaire ── -->
 <div class="falls hidden" id="falls">
-  <div class="falls__avatar"><img id="falls-img" alt=""></div>
   <div class="falls__icon"></div>
   <div class="falls__info">
     <div class="falls__row">
@@ -668,14 +657,14 @@
     STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null,
     needsOppPP && oppIsA ? 'delta-pp' : null,
     needsOppPP && oppIsA ? 'opp-img'   : null,
-    needsOppPP && oppIsA ? 'falls-img' : null
+    null
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'vs-img-b',
     STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null,
     needsOppPP && !oppIsA ? 'delta-pp' : null,
     needsOppPP && !oppIsA ? 'opp-img'   : null,
-    needsOppPP && !oppIsA ? 'falls-img' : null
+    null
   ]);
 
   // Set pseudonyms
