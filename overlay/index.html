@@ -302,25 +302,36 @@
     }
     .opp__arrow { font-size: 18px; line-height: 1; }
 
-    /* Ligne 2 : mon altitude (secondaire) */
+    /* Ligne 2 : ma pp (petite) + mon altitude (secondaire) */
     .opp__me {
       display: flex;
-      align-items: baseline;
-      gap: 6px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.45);
+      align-items: center;
+      gap: 7px;
+      margin-top: 1px;
+    }
+    .opp__me-pp {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+      opacity: 0.9;
+    }
+    .opp__me-pp img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .opp__me-alt {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255,255,255,0.7);
       text-shadow: var(--shadow);
     }
-    .opp__me strong {
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0;
-      color: rgba(255,255,255,0.92);
+    .opp__me-alt small {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      margin-left: 1px;
     }
     .opp__who { display: none; }
 
@@ -652,7 +663,10 @@
         <span class="opp__arrow" id="opp-arrow"></span><span id="opp-delta">0</span>
       </span>
     </div>
-    <div class="opp__me">toi <strong id="opp-me-num">0</strong>m</div>
+    <div class="opp__me">
+      <span class="opp__me-pp"><img id="opp-me-img" alt=""></span>
+      <span class="opp__me-alt"><span id="opp-me-num">0</span><small>m</small></span>
+    </div>
     <div class="opp__who" id="opp-who">tvabdou</div>
   </div>
 </div>
@@ -742,16 +756,16 @@
   loadTwitchAvatar(TWITCH_A, [
     'duo-img-a', 'vs-img-a',
     STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null,
-    needsOppPP && oppIsA ? 'delta-pp' : null,
-    needsOppPP && oppIsA ? 'opp-img'   : null,
-    null
+    needsOppPP && oppIsA   ? 'delta-pp'   : null,   // A = adversaire
+    needsOppPP && oppIsA   ? 'opp-img'    : null,
+    needsOppPP && viewerIsA ? 'opp-me-img' : null   // A = moi (viewer)
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'vs-img-b',
     STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null,
-    needsOppPP && !oppIsA ? 'delta-pp' : null,
-    needsOppPP && !oppIsA ? 'opp-img'   : null,
-    null
+    needsOppPP && !oppIsA   ? 'delta-pp'   : null,  // B = adversaire
+    needsOppPP && !oppIsA   ? 'opp-img'    : null,
+    needsOppPP && !viewerIsA ? 'opp-me-img' : null  // B = moi (viewer)
   ]);
 
   // Set pseudonyms
