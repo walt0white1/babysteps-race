@@ -51,10 +51,10 @@
 
     body {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: flex-end;
       min-height: 100vh;
-      padding: 20px;
+      padding: 20px 24px;
       font-family: 'JetBrains Mono', monospace;
     }
 
@@ -74,37 +74,37 @@
     }
 
     /* =========================================================================
-       STYLE: DUO (default) — 2 avatars side by side
+       STYLE: DUO (default) — 2 avatars side by side (compact pour coin OBS)
        ========================================================================= */
     .duo {
       display: flex;
       align-items: center;
-      gap: 44px;
+      gap: 28px;
     }
     .duo .player {
       --c:      var(--a);
       --c-glow: var(--a-glow);
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 12px;
     }
     .duo .player[data-p="b"] {
       --c:      var(--b);
       --c-glow: var(--b-glow);
     }
     .duo .avatar {
-      width: 110px; height: 110px;
+      width: 68px; height: 68px;
       border-radius: 50%;
       background: rgba(0,0,0,0.4);
       position: relative;
       flex-shrink: 0;
-      box-shadow: 0 6px 22px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.55);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.55);
     }
     .duo .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
     .duo .info__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 84px;
+      font-size: 52px;
       line-height: 0.85;
       color: #fff;
       letter-spacing: -0.035em;
@@ -113,21 +113,21 @@
     }
     .duo .info__alt small {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 48px;
+      font-size: 30px;
       font-weight: 700;
       letter-spacing: -0.02em;
       color: var(--c);
-      margin-left: 4px;
-      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
+      margin-left: 2px;
+      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
     }
     .duo .info__name {
       font-family: 'Montserrat', sans-serif;
-      font-size: 26px;
+      font-size: 16px;
       font-weight: 800;
       letter-spacing: -0.005em;
       color: var(--c);
-      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
-      margin-top: 8px;
+      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
+      margin-top: 4px;
     }
 
     /* =========================================================================
@@ -226,23 +226,23 @@
     }
 
     /* =========================================================================
-       STYLE: OPP — adversaire seul (PP + altitude geante)
+       STYLE: OPP — adversaire seul (compact)
        ========================================================================= */
     .opp {
       display: flex;
       align-items: center;
-      gap: 26px;
+      gap: 16px;
       --c: var(--a);
       --c-glow: var(--a-glow);
     }
     .opp[data-p="b"] { --c: var(--b); --c-glow: var(--b-glow); }
 
     .opp__avatar {
-      width: 150px; height: 150px;
+      width: 78px; height: 78px;
       border-radius: 50%;
       background: rgba(0,0,0,0.4);
       flex-shrink: 0;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6);
+      box-shadow: 0 5px 18px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.6);
     }
     .opp__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
@@ -250,7 +250,7 @@
     .opp__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 110px;
+      font-size: 64px;
       line-height: 0.82;
       color: #fff;
       letter-spacing: -0.04em;
@@ -259,31 +259,31 @@
     }
     .opp__alt small {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 56px;
+      font-size: 34px;
       font-weight: 700;
       color: var(--c);
-      margin-left: 4px;
-      text-shadow: var(--shadow), 0 0 16px var(--c-glow);
+      margin-left: 2px;
+      text-shadow: var(--shadow), 0 0 12px var(--c-glow);
     }
 
     /* =========================================================================
-       STYLE: FALLS — nombre de chutes de l'adversaire
+       STYLE: FALLS — nombre de chutes (compact)
        ========================================================================= */
     .falls {
       display: flex;
       align-items: center;
-      gap: 26px;
+      gap: 16px;
       --c: var(--a);
       --c-glow: var(--a-glow);
     }
     .falls[data-p="b"] { --c: var(--b); --c-glow: var(--b-glow); }
 
     .falls__avatar {
-      width: 130px; height: 130px;
+      width: 78px; height: 78px;
       border-radius: 50%;
       background: rgba(0,0,0,0.4);
       flex-shrink: 0;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6);
+      box-shadow: 0 5px 18px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.6);
     }
     .falls__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
@@ -291,12 +291,12 @@
     .falls__row {
       display: flex;
       align-items: baseline;
-      gap: 8px;
+      gap: 6px;
     }
     .falls__num {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 130px;
+      font-size: 76px;
       line-height: 0.82;
       color: #fff;
       letter-spacing: -0.04em;
@@ -305,10 +305,10 @@
     }
     .falls__unit {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 56px;
+      font-size: 32px;
       font-weight: 700;
       color: var(--c);
-      text-shadow: var(--shadow), 0 0 16px var(--c-glow);
+      text-shadow: var(--shadow), 0 0 12px var(--c-glow);
     }
 
     /* =========================================================================
@@ -411,16 +411,16 @@
     .delta {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 14px;
     }
 
-    /* PP adversaire (meme style que duo) */
+    /* PP adversaire (compact) */
     .delta__pp {
-      width: 110px; height: 110px;
+      width: 68px; height: 68px;
       border-radius: 50%;
       background: rgba(0,0,0,0.4);
       flex-shrink: 0;
-      box-shadow: 0 6px 22px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.55);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.55);
     }
     .delta__pp img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
@@ -439,20 +439,20 @@
     .delta__sign {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 84px;
+      font-size: 52px;
       line-height: 0.85;
       letter-spacing: -0.04em;
       transition: color 0.4s, text-shadow 0.4s;
     }
     /* Sign + unit = couleur du viewer (data-me) */
-    .delta[data-me="a"] .delta__sign { color: var(--a); text-shadow: var(--shadow), 0 0 18px var(--a-glow); }
-    .delta[data-me="b"] .delta__sign { color: var(--b); text-shadow: var(--shadow), 0 0 18px var(--b-glow); }
-    .delta.tied .delta__sign { color: rgba(255,255,255,0.4); font-size: 60px; text-shadow: var(--shadow); }
+    .delta[data-me="a"] .delta__sign { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
+    .delta[data-me="b"] .delta__sign { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
+    .delta.tied .delta__sign { color: rgba(255,255,255,0.4); font-size: 38px; text-shadow: var(--shadow); }
 
     .delta__num {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 84px;
+      font-size: 52px;
       line-height: 0.85;
       color: #fff;
       letter-spacing: -0.035em;
@@ -461,19 +461,19 @@
     }
     .delta__unit {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 48px;
+      font-size: 30px;
       font-weight: 700;
       line-height: 0.85;
       transition: color 0.4s, text-shadow 0.4s;
     }
-    .delta[data-me="a"] .delta__unit { color: var(--a); text-shadow: var(--shadow), 0 0 14px var(--a-glow); }
-    .delta[data-me="b"] .delta__unit { color: var(--b); text-shadow: var(--shadow), 0 0 14px var(--b-glow); }
+    .delta[data-me="a"] .delta__unit { color: var(--a); text-shadow: var(--shadow), 0 0 10px var(--a-glow); }
+    .delta[data-me="b"] .delta__unit { color: var(--b); text-shadow: var(--shadow), 0 0 10px var(--b-glow); }
     .delta.tied .delta__unit { color: rgba(255,255,255,0.4); }
 
     .delta__label {
       font-family: 'Montserrat', sans-serif;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 12px;
       letter-spacing: -0.005em;
       color: rgba(255,255,255,0.85);
       text-shadow: var(--shadow);
