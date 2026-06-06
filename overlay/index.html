@@ -288,17 +288,18 @@
     }
     .falls__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-    /* Pictogramme chute - SVG colore */
+    /* Pictogramme chute - image masquee + couleur joueur */
     .falls__icon {
-      width: 80px;
-      height: 80px;
-      color: var(--c);
+      width: 90px;
+      height: 90px;
+      background-color: var(--c);
+      -webkit-mask: url('fezfgzeg.png') center/contain no-repeat;
+              mask: url('fezfgzeg.png') center/contain no-repeat;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9))
               drop-shadow(0 0 14px var(--c-glow));
       animation: fallShake 1.8s ease-in-out infinite;
       flex-shrink: 0;
     }
-    .falls__icon svg { width: 100%; height: 100%; }
     @keyframes fallShake {
       0%, 100% { transform: translateY(0) rotate(0deg); }
       30%      { transform: translateY(-2px) rotate(-3deg); }
@@ -583,29 +584,7 @@
 <!-- ── FALLS : nombre de chutes de l'adversaire ── -->
 <div class="falls hidden" id="falls">
   <div class="falls__avatar"><img id="falls-img" alt=""></div>
-  <div class="falls__icon">
-    <svg viewBox="0 0 200 200" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <!-- Traits de vitesse (chute) -->
-      <line x1="46"  y1="14"  x2="46"  y2="78"  stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-      <line x1="64"  y1="28"  x2="64"  y2="70"  stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-      <line x1="128" y1="18"  x2="128" y2="82"  stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-      <line x1="146" y1="32"  x2="146" y2="74"  stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-
-      <!-- Personnage en chute (horizontal) -->
-      <!-- Tete -->
-      <circle cx="62" cy="128" r="14"/>
-      <!-- Torse -->
-      <path d="M 76 130 L 132 138 Q 142 140 144 152" stroke="currentColor" stroke-width="16" stroke-linecap="round" fill="none"/>
-      <!-- Bras arriere (etendu vers le bas) -->
-      <path d="M 72 142 L 48 162 L 28 172" stroke="currentColor" stroke-width="14" stroke-linecap="round" fill="none"/>
-      <!-- Bras avant (vers haut) -->
-      <path d="M 90 130 L 118 116 L 142 110" stroke="currentColor" stroke-width="14" stroke-linecap="round" fill="none"/>
-      <!-- Jambe haute (etendue) -->
-      <path d="M 144 152 L 178 142 L 196 152" stroke="currentColor" stroke-width="16" stroke-linecap="round" fill="none"/>
-      <!-- Jambe basse (pliee) -->
-      <path d="M 138 158 L 162 178 L 188 168" stroke="currentColor" stroke-width="15" stroke-linecap="round" fill="none"/>
-    </svg>
-  </div>
+  <div class="falls__icon"></div>
   <div class="falls__info">
     <div class="falls__row">
       <span class="falls__num" id="falls-num">0</span>
