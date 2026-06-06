@@ -421,34 +421,26 @@
        ========================================================================= */
     .delta {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 16px;
     }
 
-    /* PP adversaire (vertical layout) */
+    /* PP adversaire */
     .delta__pp {
-      width: 88px; height: 88px;
+      width: 78px; height: 78px;
       border-radius: 50%;
       background: rgba(0,0,0,0.4);
       flex-shrink: 0;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.55);
+      box-shadow: 0 5px 18px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.6);
     }
     .delta__pp img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-    .delta__main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
+    .delta__main { display: flex; }
 
-    /* Chiffre - meme typo que duo: chiffre blanc + unite color */
     .delta__row {
       display: flex;
       align-items: baseline;
-      gap: 6px;
-      justify-content: center;
+      gap: 4px;
     }
     .delta__sign {
       font-family: 'Big Shoulders Display', sans-serif;
@@ -600,7 +592,6 @@
       <span class="delta__num" id="delta-num">0</span>
       <span class="delta__unit">m</span>
     </div>
-    <div class="delta__label" id="delta-label">égalité</div>
   </div>
 </div>
 
@@ -756,9 +747,8 @@
       const opp  = isA ? bH       : aH;
       const oppN = isA ? TWITCH_B : TWITCH_A;
       const diff = me - opp;
-      const root  = document.getElementById('delta');
-      const sign  = document.getElementById('delta-sign');
-      const label = document.getElementById('delta-label');
+      const root = document.getElementById('delta');
+      const sign = document.getElementById('delta-sign');
 
       root.dataset.me = isA ? 'a' : 'b';
       root.classList.remove('ahead', 'behind', 'tied');
@@ -767,17 +757,14 @@
         root.classList.add('tied');
         sign.textContent = '=';
         setNumSmooth('delta-num', 0);
-        label.textContent = 'égalité';
       } else if (diff > 0) {
         root.classList.add('ahead');
         sign.textContent = '+';
         setNumSmooth('delta-num', diff);
-        label.textContent = "d'avance";
       } else {
         root.classList.add('behind');
         sign.textContent = '−';
         setNumSmooth('delta-num', Math.abs(diff));
-        label.textContent = 'de retard';
       }
     }
 
