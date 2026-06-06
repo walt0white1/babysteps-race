@@ -238,17 +238,19 @@
     }
     .opp__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-    .opp__info { display: flex; flex-direction: column; }
+    .opp__info { display: flex; flex-direction: column; gap: 5px; }
+
+    /* Ligne 1 : altitude adversaire + badge ecart */
     .opp__row {
       display: flex;
-      align-items: baseline;
-      gap: 10px;
+      align-items: center;
+      gap: 12px;
     }
     .opp__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
       font-size: 64px;
-      line-height: 0.82;
+      line-height: 0.78;
       color: #fff;
       letter-spacing: -0.04em;
       font-variant-numeric: tabular-nums;
@@ -256,35 +258,69 @@
     }
     .opp__alt small {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 700;
       color: var(--c);
       margin-left: 2px;
       text-shadow: var(--shadow), 0 0 12px var(--c-glow);
     }
-    .opp__delta {
+
+    /* Badge ecart : pill avec fond teinte + fleche */
+    .opp__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 36px;
-      line-height: 0.82;
-      color: var(--c);
-      letter-spacing: -0.03em;
+      font-size: 26px;
+      line-height: 1;
+      letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
-      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
+      padding: 4px 11px 3px;
+      border-radius: 999px;
+      transition: background 0.4s, color 0.4s;
     }
+    /* Adversaire DEVANT moi (je suis derriere) -> badge rouge alerte */
+    .opp__badge.behind {
+      color: #fff;
+      background: rgba(239,68,68,0.22);
+      box-shadow: inset 0 0 0 1.5px rgba(239,68,68,0.55), 0 0 14px rgba(239,68,68,0.3);
+    }
+    .opp__badge.behind .opp__arrow { color: #f87171; }
+    /* Adversaire DERRIERE moi (je mene) -> badge vert */
+    .opp__badge.ahead {
+      color: #fff;
+      background: rgba(34,197,94,0.22);
+      box-shadow: inset 0 0 0 1.5px rgba(34,197,94,0.55), 0 0 14px rgba(34,197,94,0.3);
+    }
+    .opp__badge.ahead .opp__arrow { color: #4ade80; }
+    /* Egalite */
+    .opp__badge.tied {
+      color: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.1);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.2);
+    }
+    .opp__arrow { font-size: 18px; line-height: 1; }
+
+    /* Ligne 2 : mon altitude (secondaire) */
     .opp__me {
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.55);
-      letter-spacing: 0;
-      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
       text-shadow: var(--shadow);
-      margin-top: 2px;
     }
     .opp__me strong {
-      color: rgba(255,255,255,0.85);
-      font-weight: 900;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: rgba(255,255,255,0.92);
     }
     .opp__who { display: none; }
 
@@ -606,15 +642,17 @@
   </div>
 </div>
 
-<!-- ── OPP : adversaire (altitude) + delta + mon altitude en dessous ── -->
+<!-- ── OPP : adversaire (altitude) + badge ecart + mon altitude en dessous ── -->
 <div class="opp hidden" id="opp">
   <div class="opp__avatar"><img id="opp-img" alt=""></div>
   <div class="opp__info">
     <div class="opp__row">
       <span class="opp__alt"><span id="opp-num">0</span><small>m</small></span>
-      <span class="opp__delta" id="opp-delta">=</span>
+      <span class="opp__badge tied" id="opp-badge">
+        <span class="opp__arrow" id="opp-arrow"></span><span id="opp-delta">0</span>
+      </span>
     </div>
-    <div class="opp__me">tu es à <strong id="opp-me-num">0</strong>m</div>
+    <div class="opp__me">toi <strong id="opp-me-num">0</strong>m</div>
     <div class="opp__who" id="opp-who">tvabdou</div>
   </div>
 </div>
@@ -770,21 +808,37 @@
       setText('solo-falls', p.falls);
     }
 
-    // opp - altitude adversaire + delta + mon altitude en dessous
+    // opp - altitude adversaire + badge ecart + mon altitude en dessous
     if (STYLE === 'opp') {
-      const opp = oppIsA ? a : b;
-      const me  = oppIsA ? b : a;
+      const opp  = oppIsA ? a : b;
+      const me   = oppIsA ? b : a;
       const oppH = toM(opp.height);
       const meH  = toM(me.height);
-      const diff = oppH - meH;   // positif = lui est devant moi
+      const diff = oppH - meH;   // positif = adversaire devant moi
 
       setNumSmooth('opp-num', oppH);
       setNumSmooth('opp-me-num', meH);
 
-      const deltaEl = document.getElementById('opp-delta');
-      if (diff === 0)      deltaEl.textContent = '=';
-      else if (diff > 0)   deltaEl.textContent = '+' + diff;
-      else                 deltaEl.textContent = '−' + Math.abs(diff);
+      const badge = document.getElementById('opp-badge');
+      const arrow = document.getElementById('opp-arrow');
+      const delta = document.getElementById('opp-delta');
+
+      badge.classList.remove('ahead', 'behind', 'tied');
+      if (diff === 0) {
+        badge.classList.add('tied');
+        arrow.textContent = '=';
+        delta.textContent = '';
+      } else if (diff > 0) {
+        // adversaire est plus haut -> je suis derriere (alerte rouge)
+        badge.classList.add('behind');
+        arrow.textContent = '▲';
+        delta.textContent = diff + 'm';
+      } else {
+        // adversaire plus bas -> je mene (vert)
+        badge.classList.add('ahead');
+        arrow.textContent = '▼';
+        delta.textContent = Math.abs(diff) + 'm';
+      }
     }
 
     // falls - nombre de chutes de l'adversaire
