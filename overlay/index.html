@@ -265,6 +265,15 @@
       margin-left: 2px;
       text-shadow: var(--shadow), 0 0 12px var(--c-glow);
     }
+    .opp__who {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
+      margin-top: 4px;
+    }
 
     /* =========================================================================
        STYLE: FALLS — pictogramme de chute + nombre
@@ -318,6 +327,15 @@
       font-weight: 700;
       color: var(--c);
       text-shadow: var(--shadow), 0 0 12px var(--c-glow);
+    }
+    .falls__who {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.005em;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
+      margin-top: 4px;
     }
 
     /* =========================================================================
@@ -568,6 +586,7 @@
   <div class="opp__avatar"><img id="opp-img" alt=""></div>
   <div class="opp__info">
     <div class="opp__alt"><span id="opp-num">0</span><small>m</small></div>
+    <div class="opp__who" id="opp-who">tvabdou</div>
   </div>
 </div>
 
@@ -579,6 +598,7 @@
       <span class="falls__num" id="falls-num">0</span>
       <span class="falls__unit">chutes</span>
     </div>
+    <div class="falls__who" id="falls-who">tvabdou</div>
   </div>
 </div>
 
@@ -670,6 +690,9 @@
   // Set pseudonyms
   setText('duo-name-a', TWITCH_A); setText('duo-name-b', TWITCH_B);
   if (STYLE === 'solo') setText('solo-name', SOLO_PLAYER === 'playerB' ? TWITCH_B : TWITCH_A);
+  // Pseudo de l'adversaire dans opp/falls
+  setText('opp-who',   oppName);
+  setText('falls-who', oppName);
   // Couleur dataset pour opp et falls (celle de l'adversaire)
   document.getElementById('opp').dataset.p   = oppIsA ? 'a' : 'b';
   document.getElementById('falls').dataset.p = oppIsA ? 'a' : 'b';
