@@ -120,15 +120,7 @@
       margin-left: 2px;
       text-shadow: var(--shadow), 0 0 10px var(--c-glow);
     }
-    .duo .info__name {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: -0.005em;
-      color: var(--c);
-      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
-      margin-top: 4px;
-    }
+    .duo .info__name { display: none; }
 
     /* =========================================================================
        STYLE: SOLO — single player big showcase
@@ -265,15 +257,7 @@
       margin-left: 2px;
       text-shadow: var(--shadow), 0 0 12px var(--c-glow);
     }
-    .opp__who {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: -0.005em;
-      color: var(--c);
-      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
-      margin-top: 4px;
-    }
+    .opp__who { display: none; }
 
     /* =========================================================================
        STYLE: FALLS — pictogramme de chute + nombre
@@ -774,23 +758,21 @@
       root.dataset.me = isA ? 'a' : 'b';
       root.classList.remove('ahead', 'behind', 'tied');
 
-      const oppSpan = '<span class="delta__label-opp">' + oppN + '</span>';
-
       if (diff === 0) {
         root.classList.add('tied');
         sign.textContent = '=';
         setNumSmooth('delta-num', 0);
-        label.innerHTML = 'égalité avec ' + oppSpan;
+        label.textContent = 'égalité';
       } else if (diff > 0) {
         root.classList.add('ahead');
         sign.textContent = '+';
         setNumSmooth('delta-num', diff);
-        label.innerHTML = "d'avance sur " + oppSpan;
+        label.textContent = "d'avance";
       } else {
         root.classList.add('behind');
         sign.textContent = '−';
         setNumSmooth('delta-num', Math.abs(diff));
-        label.innerHTML = 'de retard sur ' + oppSpan;
+        label.textContent = 'de retard';
       }
     }
 
