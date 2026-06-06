@@ -239,6 +239,11 @@
     .opp__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
     .opp__info { display: flex; flex-direction: column; }
+    .opp__row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
     .opp__alt {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
@@ -256,6 +261,30 @@
       color: var(--c);
       margin-left: 2px;
       text-shadow: var(--shadow), 0 0 12px var(--c-glow);
+    }
+    .opp__delta {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 36px;
+      line-height: 0.82;
+      color: var(--c);
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow), 0 0 14px var(--c-glow);
+    }
+    .opp__me {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+      margin-top: 2px;
+    }
+    .opp__me strong {
+      color: rgba(255,255,255,0.85);
+      font-weight: 900;
     }
     .opp__who { display: none; }
 
@@ -577,11 +606,15 @@
   </div>
 </div>
 
-<!-- ── OPP : adversaire seul ── -->
+<!-- ── OPP : adversaire (altitude) + delta + mon altitude en dessous ── -->
 <div class="opp hidden" id="opp">
   <div class="opp__avatar"><img id="opp-img" alt=""></div>
   <div class="opp__info">
-    <div class="opp__alt"><span id="opp-num">0</span><small>m</small></div>
+    <div class="opp__row">
+      <span class="opp__alt"><span id="opp-num">0</span><small>m</small></span>
+      <span class="opp__delta" id="opp-delta">=</span>
+    </div>
+    <div class="opp__me">tu es à <strong id="opp-me-num">0</strong>m</div>
     <div class="opp__who" id="opp-who">tvabdou</div>
   </div>
 </div>
@@ -737,10 +770,21 @@
       setText('solo-falls', p.falls);
     }
 
-    // opp - altitude de l'adversaire
+    // opp - altitude adversaire + delta + mon altitude en dessous
     if (STYLE === 'opp') {
       const opp = oppIsA ? a : b;
-      setNumSmooth('opp-num', toM(opp.height));
+      const me  = oppIsA ? b : a;
+      const oppH = toM(opp.height);
+      const meH  = toM(me.height);
+      const diff = oppH - meH;   // positif = lui est devant moi
+
+      setNumSmooth('opp-num', oppH);
+      setNumSmooth('opp-me-num', meH);
+
+      const deltaEl = document.getElementById('opp-delta');
+      if (diff === 0)      deltaEl.textContent = '=';
+      else if (diff > 0)   deltaEl.textContent = '+' + diff;
+      else                 deltaEl.textContent = '−' + Math.abs(diff);
     }
 
     // falls - nombre de chutes de l'adversaire
@@ -824,8 +868,7 @@
   let currentStyle = null;
   const cycleSequence = [
     { id: 'duo',   style: 'duo',   duration: 18000 },
-    { id: 'opp',   style: 'opp',   duration: 14000 },
-    { id: 'delta', style: 'delta', duration: 12000 },
+    { id: 'opp',   style: 'opp',   duration: 14000 },  // contient maintenant opp + delta fusionnes
     { id: 'falls', style: 'falls', duration: 9000  },
   ];
   let cycleIdx = 0;
