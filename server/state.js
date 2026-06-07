@@ -40,12 +40,14 @@ function getPlayer(playerId) {
  * Update a player's height.
  * Returns { leadChanged, newLeader } so the caller can emit events.
  */
-// Historique par joueur : [{t, h}, ...] sur les 2 dernieres secondes
-const heightHistory = { playerA: [], playerB: [] };
-// Cooldown anti-spam: pas de nouvelle chute pendant 2s apres une detection
-const fallCooldown = { playerA: 0, playerB: 0 };
-const FALL_WINDOW_MS  = 2000;
-const FALL_THRESHOLD  = 150;     // ~5m affiches (avec SCALE=30)
+// État de chute par joueur (machine à états)
+const fallState = {
+  playerA: { isFalling: false, peak: 0, bottom: 0, lastDropT: 0 },
+  playerB: { isFalling: false, peak: 0, bottom: 0, lastDropT: 0 },
+};
+const FALL_THRESHOLD     = 150;   // ~5m affiches : seuil pour declencher une chute
+const FALL_RECOVERY      = 30;    // 1m remonte = chute consideree finie
+const FALL_TIMEOUT_MS    = 2500;  // immobile 2.5s apres avoir touche le bas = chute finie
 
 function updatePlayer(playerId, { height, name, maxHeight }) {
   const player = state[playerId];
@@ -56,25 +58,39 @@ function updatePlayer(playerId, { height, name, maxHeight }) {
 
   if (name !== undefined) player.name = name;
   if (height !== undefined) {
+    const prev = player.height;
     player.height = Math.max(0, height);
+    const curr = player.height;
+    const now  = Date.now();
+    const fs   = fallState[playerId];
 
-    // ── Detection chute sur fenetre glissante de 2s ──
-    const now = Date.now();
-    const hist = heightHistory[playerId];
-    hist.push({ t: now, h: player.height });
-    // garde uniquement les samples des 2 dernieres secondes
-    while (hist.length > 1 && now - hist[0].t > FALL_WINDOW_MS) hist.shift();
-
-    if (now >= fallCooldown[playerId]) {
-      // hauteur max sur la fenetre (le "haut" de la chute)
-      let peak = hist[0].h;
-      for (const s of hist) if (s.h > peak) peak = s.h;
-      const totalDrop = peak - player.height;
-      if (totalDrop >= FALL_THRESHOLD) {
-        player.falls += 1;
-        fell = true;
-        drop = totalDrop;
-        fallCooldown[playerId] = now + FALL_WINDOW_MS;  // anti-spam
+    if (!fs.isFalling) {
+      // Pas en chute. Si on commence à perdre de la hauteur, on démarre l'état chute
+      if (prev - curr > 0) {
+        fs.isFalling = true;
+        fs.peak      = prev;
+        fs.bottom    = curr;
+        fs.lastDropT = now;
+      }
+    } else {
+      // En chute. On suit le point le plus bas atteint
+      if (curr < fs.bottom) {
+        fs.bottom    = curr;
+        fs.lastDropT = now;
+      }
+      // Conditions de FIN de chute :
+      // - le joueur remonte au-dessus du bottom (>= recovery)
+      // - OU il est immobile près du bas depuis FALL_TIMEOUT_MS
+      const recovered  = curr - fs.bottom >= FALL_RECOVERY;
+      const stalled    = now - fs.lastDropT >= FALL_TIMEOUT_MS;
+      if (recovered || stalled) {
+        const totalDrop = fs.peak - fs.bottom;
+        if (totalDrop >= FALL_THRESHOLD) {
+          player.falls += 1;
+          fell = true;
+          drop = totalDrop;
+        }
+        fs.isFalling = false;
       }
     }
   }
