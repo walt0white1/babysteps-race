@@ -1226,8 +1226,6 @@
   const cycleSequence = [
     { id: 'duo',   style: 'duo',   duration: 6000 },
     { id: 'opp',   style: 'opp',   duration: 5000 },
-    { id: 'peak',  style: 'peak',  duration: 5000 },
-    { id: 'speed', style: 'speed', duration: 5000 },
     { id: 'falls', style: 'falls', duration: 5000 },
   ];
   let cycleIdx = 0;
@@ -1275,6 +1273,20 @@
 
   // Demarrer la rotation maintenant que tout est defini
   startCycle();
+
+  // ── Mode test : previsualiser les popups ──
+  // ?test=fall  -> rejoue l'alerte chute toutes les 4s
+  // ?test=milestone -> rejoue le milestone toutes les 4s
+  const TEST = params.get('test');
+  if (TEST === 'fall') {
+    const who = viewerIsA ? 'playerB' : 'playerA';
+    showFallAlert(who);
+    setInterval(() => showFallAlert(who), 4000);
+  } else if (TEST === 'milestone') {
+    let cap = 100;
+    showMilestone(cap);
+    setInterval(() => { cap += 100; showMilestone(cap); }, 4000);
+  }
 
   // ── Reveal du gagnant (VS style) : appele une seule fois apres l'anim ──
   let vsRevealed = false;
