@@ -51,10 +51,10 @@
 
     body {
       display: flex;
-      align-items: flex-start;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
-      padding: 20px 24px;
+      padding: 20px;
       font-family: 'JetBrains Mono', monospace;
       zoom: 1.3;   /* taille globale */
     }
@@ -710,20 +710,20 @@
        EVENT: alerte chute + milestone (flash plein ecran)
        ========================================================================= */
     @keyframes eventPop {
-      0%   { opacity: 0; transform: scale(0.7) translateX(20px); }
-      12%  { opacity: 1; transform: scale(1.06) translateX(0); }
-      22%  { transform: scale(1) translateX(0); }
-      80%  { opacity: 1; transform: scale(1) translateX(0); }
-      100% { opacity: 0; transform: scale(1) translateX(10px); }
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+      12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+      22%  { transform: translate(-50%, -50%) scale(1); }
+      80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); }
     }
-    /* Ancre en haut a droite, comme les overlays */
+    /* Centre, comme les overlays */
     .event-flash {
       position: fixed;
-      top: 20px; right: 24px;
-      transform-origin: top right;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
       gap: 2px;
       pointer-events: none;
       z-index: 1000;
