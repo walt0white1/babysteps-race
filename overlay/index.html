@@ -947,12 +947,21 @@
   // SHOW THE RIGHT LAYOUT
   // =========================================================================
   const ALL_OVERLAYS = ['duo','solo','vs','delta','opp','falls','peak','speed'];
-  if (CYCLE) {
-    ALL_OVERLAYS.forEach(id => document.getElementById(id).classList.add('hidden'));
-  } else {
-    ALL_OVERLAYS.forEach(id => {
-      document.getElementById(id).classList.toggle('hidden', STYLE !== id);
+  let currentId = null;   // l'overlay que le cycle/style veut afficher (source de verite)
+
+  // Affiche UNIQUEMENT cet overlay (ou rien si null). Une seule source de verite.
+  function showOnly(id) {
+    ALL_OVERLAYS.forEach(o => {
+      const el = document.getElementById(o);
+      if (el) el.classList.toggle('hidden', o !== id);
     });
+  }
+
+  if (CYCLE) {
+    showOnly(null);          // tout cache, le cycle affichera le 1er
+  } else {
+    currentId = STYLE;
+    showOnly(STYLE);
   }
 
   // Solo: choose player A or B
@@ -1203,11 +1212,8 @@
 
   // Cache l'overlay visible pendant qu'un popup s'affiche (popup prend sa place)
   function hideOverlaysDuringEvent(ms) {
-    const visible = ALL_OVERLAYS
-      .map(id => document.getElementById(id))
-      .filter(el => el && !el.classList.contains('hidden'));
-    visible.forEach(el => el.classList.add('hidden'));
-    setTimeout(() => visible.forEach(el => el.classList.remove('hidden')), ms);
+    showOnly(null);   // cache tout pendant le popup
+    setTimeout(() => showOnly(currentId), ms);  // restaure l'overlay courant
   }
 
   // ── Milestone : flash quand JE passe un cap rond (100, 200, ...) ──
@@ -1289,25 +1295,18 @@
       document.getElementById('vs-num-b').textContent = '0';
     }
 
-    // Mettre a jour le STYLE actif (pour applyState)
+    // Mettre a jour le STYLE actif + la source de verite de visibilite
     currentStyle = item.style;
-    node.classList.remove('hidden');
+    currentId    = item.id;
+    showOnly(item.id);
     // Force un applyState immediat pour remplir les valeurs avec le bon style
     if (lastState) applyState(lastState);
-  }
-
-  function hideOverlayInCycle(item) {
-    const node = document.getElementById(item.id);
-    if (node) node.classList.add('hidden');
   }
 
   function startCycle() {
     if (!CYCLE) return;
     const tick = () => {
-      const prev = cycleSequence[(cycleIdx - 1 + cycleSequence.length) % cycleSequence.length];
-      const cur  = cycleSequence[cycleIdx];
-      if (cycleIdx > 0) hideOverlayInCycle(prev);
-      else cycleSequence.forEach(it => hideOverlayInCycle(it));
+      const cur = cycleSequence[cycleIdx];
       showOverlayInCycle(cur);
       cycleIdx = (cycleIdx + 1) % cycleSequence.length;
       setTimeout(tick, cur.duration);
