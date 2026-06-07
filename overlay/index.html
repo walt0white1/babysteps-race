@@ -1211,16 +1211,17 @@
   }
 
   // ── Milestone : flash quand JE passe un cap rond (100, 200, ...) ──
-  let lastMilestone = 0;
+  let lastMilestone = null;   // null = pas encore initialise
   const MILESTONE_STEP = 100;
   function checkMilestone(meH) {
     const cap = Math.floor(meH / MILESTONE_STEP) * MILESTONE_STEP;
-    if (cap > lastMilestone && cap > 0) {
-      // ne pas flasher au tout premier chargement si deja haut
-      if (lastMilestone !== 0) showMilestone(cap);
+    if (lastMilestone === null) {
+      lastMilestone = cap;     // init silencieux au 1er state (evite flash au chargement si deja haut)
+      return;
+    }
+    if (cap > lastMilestone) {
+      showMilestone(cap);
       lastMilestone = cap;
-    } else if (lastMilestone === 0) {
-      lastMilestone = cap;  // init silencieux
     }
   }
   function showMilestone(cap) {
