@@ -34,13 +34,18 @@ app.post('/api/update', (req, res) => {
   const { playerId, height, name, maxHeight } = req.body;
   if (!playerId) return res.status(400).json({ error: 'playerId required' });
 
-  const { leadChanged, newLeader } = state.updatePlayer(playerId, { height, name, maxHeight });
+  const { leadChanged, newLeader, fell, drop } = state.updatePlayer(playerId, { height, name, maxHeight });
 
   const full = state.getState();
   io.emit(EVENTS.STATE_SYNC, full);
 
   if (leadChanged) {
     io.emit(EVENTS.LEAD_CHANGE, { leader: newLeader, state: full });
+  }
+
+  // Chute auto detectee par le tracker -> popup avec l'ampleur
+  if (fell) {
+    io.emit(EVENTS.FALL, { playerId, drop, state: full });
   }
 
   res.json({ ok: true, state: full });

@@ -42,7 +42,10 @@ function getPlayer(playerId) {
  */
 function updatePlayer(playerId, { height, name, maxHeight }) {
   const player = state[playerId];
-  if (!player) return { leadChanged: false, newLeader: null };
+  if (!player) return { leadChanged: false, newLeader: null, fell: false, drop: 0 };
+
+  let fell = false;
+  let drop = 0;
 
   if (name !== undefined) player.name = name;
   if (height !== undefined) {
@@ -50,6 +53,8 @@ function updatePlayer(playerId, { height, name, maxHeight }) {
     player.height = Math.max(0, height);
     if (prev - player.height >= 150) {
       player.falls += 1;
+      fell = true;
+      drop = prev - player.height;   // ampleur de la chute (unites brutes)
     }
   }
   // maxHeight peut etre envoye directement par le tracker (record depuis le fichier)
@@ -64,7 +69,7 @@ function updatePlayer(playerId, { height, name, maxHeight }) {
 
   const leadChanged = checkLeadChange();
   saveState();
-  return { leadChanged, newLeader: getLeader() };
+  return { leadChanged, newLeader: getLeader(), fell, drop };
 }
 
 function recordFall(playerId) {

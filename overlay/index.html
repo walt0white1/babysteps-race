@@ -1013,7 +1013,7 @@
   let lastState = null;
   socket.on('state_sync', (s) => { lastState = s; applyState(s); });
   socket.on('lead_change', ({ leader, state }) => { lastState = state; applyState(state); flashLead(leader, state); });
-  socket.on('fall', ({ playerId }) => { shakeFall(playerId); showFallAlert(playerId); });
+  socket.on('fall', ({ playerId, drop }) => { shakeFall(playerId); showFallAlert(playerId, drop); });
 
   // Style effectif (rotation ou statique)
   function activeStyle() { return CYCLE ? (currentStyle || 'duo') : STYLE; }
@@ -1224,18 +1224,21 @@
     setTimeout(() => d.remove(), 3000);
   }
 
-  // ── Alerte chute : flash quand quelqu'un tombe ──
-  function showFallAlert(playerId) {
+  // ── Alerte chute : flash quand quelqu'un tombe (avec ampleur) ──
+  function showFallAlert(playerId, drop) {
     const name  = playerId === 'playerA' ? TWITCH_A : TWITCH_B;
-    const isMe  = (playerId === 'playerA') === viewerIsA;
     const color = playerId === 'playerA' ? '#22d3ee' : '#fbbf24';
     const glow  = playerId === 'playerA' ? 'rgba(34,211,238,0.6)' : 'rgba(251,191,36,0.6)';
+    const dropM = toM(drop || 0);
+    const sub   = dropM > 0
+      ? name + ' a chuté de ' + dropM + 'm'
+      : name + ' est tombé';
     const d = document.createElement('div');
     d.className = 'event-flash';
     d.innerHTML =
       '<div class="event-flash__big" style="color:' + color +
         ';text-shadow:0 0 30px ' + glow + ',0 4px 16px rgba(0,0,0,0.95)">CHUTE</div>' +
-      '<div class="event-flash__sub">' + name + ' est tombé</div>';
+      '<div class="event-flash__sub">' + sub + '</div>';
     hideOverlaysDuringEvent(3000);
     document.body.appendChild(d);
     setTimeout(() => d.remove(), 3000);
@@ -1300,8 +1303,8 @@
   const TEST = params.get('test');
   if (TEST === 'fall') {
     const who = viewerIsA ? 'playerB' : 'playerA';
-    showFallAlert(who);
-    setInterval(() => showFallAlert(who), 4000);
+    showFallAlert(who, 6000);   // ex: chute de 6000 unites brutes
+    setInterval(() => showFallAlert(who, 6000), 4000);
   } else if (TEST === 'milestone') {
     let cap = 100;
     showMilestone(cap);
