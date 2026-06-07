@@ -716,14 +716,17 @@
       80%  { opacity: 1; transform: scale(1); }
       100% { opacity: 0; transform: scale(1); }
     }
-    /* Horizontal (icone gauche + infos droite), dans le flux = meme position que les overlays */
+    /* Horizontal, position fixe au meme coin que les overlays (hors flux) */
     .event-flash {
+      position: fixed;
+      top: 20px; right: 24px;
       display: flex;
       flex-direction: row;
       align-items: center;
       gap: 14px;
       transform-origin: top right;
       pointer-events: none;
+      z-index: 1000;
       animation: eventPop 3s ease forwards;
     }
     /* Pictogramme chute */
@@ -1211,7 +1214,9 @@
   }
 
   // Cache l'overlay visible pendant qu'un popup s'affiche (popup prend sa place)
+  let eventActiveUntil = 0;   // timestamp jusqu'auquel un popup occupe l'ecran
   function hideOverlaysDuringEvent(ms) {
+    eventActiveUntil = performance.now() + ms;   // met le cycle en pause
     showOnly(null);   // cache tout pendant le popup
     setTimeout(() => showOnly(currentId), ms);  // restaure l'overlay courant
   }
@@ -1306,6 +1311,11 @@
   function startCycle() {
     if (!CYCLE) return;
     const tick = () => {
+      const now = performance.now();
+      if (now < eventActiveUntil) {        // un popup occupe l'ecran -> on attend
+        setTimeout(tick, eventActiveUntil - now + 50);
+        return;
+      }
       const cur = cycleSequence[cycleIdx];
       showOverlayInCycle(cur);
       cycleIdx = (cycleIdx + 1) % cycleSequence.length;
