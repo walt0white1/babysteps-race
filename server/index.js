@@ -30,6 +30,27 @@ app.get('/api/state', (_req, res) => {
   res.json(state.getState());
 });
 
+app.get('/api/config', (_req, res) => {
+  res.json(state.getConfig());
+});
+
+app.post('/api/admin/config', (req, res) => {
+  const patch = req.body || {};
+  // Sanitize: numeric fields stay numeric, ignore unknown keys
+  const allowed = ['scale','fallThreshold','fallMinSpeed','fallRecovery','fallTimeoutMs',
+                   'milestoneStep','cycleDuoSec','cycleOppSec','cycleFallsSec'];
+  const clean = {};
+  for (const k of allowed) {
+    if (patch[k] !== undefined) {
+      const n = Number(patch[k]);
+      if (Number.isFinite(n) && n > 0) clean[k] = n;
+    }
+  }
+  const updated = state.updateConfig(clean);
+  io.emit(EVENTS.CONFIG_SYNC, updated);
+  res.json({ ok: true, config: updated });
+});
+
 app.post('/api/update', (req, res) => {
   const { playerId, height, name, maxHeight } = req.body;
   if (!playerId) return res.status(400).json({ error: 'playerId required' });
@@ -95,6 +116,7 @@ io.on('connection', (socket) => {
 
   // Send current state immediately on connect
   socket.emit(EVENTS.STATE_SYNC, state.getState());
+  socket.emit(EVENTS.CONFIG_SYNC, state.getConfig());
 
   socket.on(EVENTS.UPDATE_PLAYER, (data) => {
     const { playerId, height, name } = data;

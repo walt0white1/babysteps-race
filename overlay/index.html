@@ -941,10 +941,17 @@
   const TWITCH_A = params.get('twitchA') || 'el_matte0';
   const TWITCH_B = params.get('twitchB') || 'tvabdou';
 
-  // ── Scaling factor: raw save units per displayed metre ──
-  // 30 = calibre sur retour utilisateur (~3m par pas, 18 pas = 50m). Override via ?scale=X
-  const SCALE = Math.max(1, parseFloat(params.get('scale')) || 30);
-  const toM = (v) => Math.round((v || 0) / SCALE);
+  // ── Config live (recue du serveur, modifiable via /admin) ──
+  // ?scale=X dans l'URL override le scale du serveur, sinon defaults
+  let liveConfig = {
+    scale: parseFloat(params.get('scale')) || 30,
+    milestoneStep: 100,
+    cycleDuoSec: 6,
+    cycleOppSec: 5,
+    cycleFallsSec: 5,
+  };
+  const urlScaleOverride = !!params.get('scale');
+  const toM = (v) => Math.round((v || 0) / (liveConfig.scale || 30));
 
   // =========================================================================
   // SHOW THE RIGHT LAYOUT
@@ -1039,6 +1046,14 @@
   socket.on('state_sync', (s) => { lastState = s; applyState(s); });
   socket.on('lead_change', ({ leader, state }) => { lastState = state; applyState(state); flashLead(leader, state); });
   socket.on('fall', ({ playerId, drop }) => { shakeFall(playerId); showFallAlert(playerId, drop); });
+  socket.on('config_sync', (cfg) => {
+    // ?scale=X dans l'URL bypass le scale serveur
+    const previousScale = urlScaleOverride ? liveConfig.scale : null;
+    liveConfig = { ...liveConfig, ...cfg };
+    if (urlScaleOverride) liveConfig.scale = previousScale;
+    // Force un re-render avec les nouvelles valeurs
+    if (lastState) applyState(lastState);
+  });
 
   // Style effectif (rotation ou statique)
   function activeStyle() { return CYCLE ? (currentStyle || 'duo') : STYLE; }
@@ -1223,9 +1238,9 @@
 
   // ── Milestone : flash quand JE passe un cap rond (100, 200, ...) ──
   let lastMilestone = null;   // null = pas encore initialise
-  const MILESTONE_STEP = 100;
   function checkMilestone(meH) {
-    const cap = Math.floor(meH / MILESTONE_STEP) * MILESTONE_STEP;
+    const step = liveConfig.milestoneStep || 100;
+    const cap = Math.floor(meH / step) * step;
     if (lastMilestone === null) {
       lastMilestone = cap;     // init silencieux au 1er state
       return;
@@ -1278,10 +1293,11 @@
 
   // ── ROTATION : cycle des overlays automatiquement ──
   let currentStyle = null;
+  // Le tableau utilise des getters pour lire la config en live a chaque tick
   const cycleSequence = [
-    { id: 'duo',   style: 'duo',   duration: 6000 },
-    { id: 'opp',   style: 'opp',   duration: 5000 },
-    { id: 'falls', style: 'falls', duration: 5000 },
+    { id: 'duo',   style: 'duo',   get duration() { return (liveConfig.cycleDuoSec   || 6) * 1000; } },
+    { id: 'opp',   style: 'opp',   get duration() { return (liveConfig.cycleOppSec   || 5) * 1000; } },
+    { id: 'falls', style: 'falls', get duration() { return (liveConfig.cycleFallsSec || 5) * 1000; } },
   ];
   let cycleIdx = 0;
 

@@ -202,6 +202,99 @@
   </div>
 </div>
 
+<!-- CONFIG LIVE -->
+<div class="global-card" style="margin-bottom:16px">
+  <h2>⚙️ CONFIG LIVE</h2>
+  <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">
+    Modifs appliquées instantanément à tous les overlays connectés.
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <!-- Calibration -->
+    <div>
+      <label>SCALE — unités brutes / mètre</label>
+      <div class="row">
+        <input type="number" id="cfg-scale" min="1" step="1" oninput="onCfg('scale', this.value)">
+        <span class="cfg-val" id="cfg-scale-val"></span>
+      </div>
+    </div>
+    <!-- Milestone -->
+    <div>
+      <label>Milestone — flash tous les X m</label>
+      <div class="row">
+        <input type="number" id="cfg-milestoneStep" min="1" step="10" oninput="onCfg('milestoneStep', this.value)">
+        <span class="cfg-val" id="cfg-milestoneStep-val"></span>
+      </div>
+    </div>
+
+    <!-- Chute - amplitude -->
+    <div>
+      <label>Chute — amplitude min (unités)</label>
+      <div class="row">
+        <input type="number" id="cfg-fallThreshold" min="1" step="10" oninput="onCfg('fallThreshold', this.value)">
+        <span class="cfg-val" id="cfg-fallThreshold-val"></span>
+      </div>
+    </div>
+    <!-- Chute - vitesse -->
+    <div>
+      <label>Chute — vitesse min (unités/s)</label>
+      <div class="row">
+        <input type="number" id="cfg-fallMinSpeed" min="1" step="10" oninput="onCfg('fallMinSpeed', this.value)">
+        <span class="cfg-val" id="cfg-fallMinSpeed-val"></span>
+      </div>
+    </div>
+
+    <!-- Chute - recovery -->
+    <div>
+      <label>Chute — remontée fin (unités)</label>
+      <div class="row">
+        <input type="number" id="cfg-fallRecovery" min="1" step="5" oninput="onCfg('fallRecovery', this.value)">
+        <span class="cfg-val" id="cfg-fallRecovery-val"></span>
+      </div>
+    </div>
+    <!-- Chute - timeout -->
+    <div>
+      <label>Chute — timeout immobile (ms)</label>
+      <div class="row">
+        <input type="number" id="cfg-fallTimeoutMs" min="500" step="100" oninput="onCfg('fallTimeoutMs', this.value)">
+        <span class="cfg-val" id="cfg-fallTimeoutMs-val"></span>
+      </div>
+    </div>
+
+    <!-- Cycle durations -->
+    <div>
+      <label>Cycle — durée duo (s)</label>
+      <div class="row">
+        <input type="number" id="cfg-cycleDuoSec" min="1" step="1" oninput="onCfg('cycleDuoSec', this.value)">
+        <span class="cfg-val" id="cfg-cycleDuoSec-val"></span>
+      </div>
+    </div>
+    <div>
+      <label>Cycle — durée opp (s)</label>
+      <div class="row">
+        <input type="number" id="cfg-cycleOppSec" min="1" step="1" oninput="onCfg('cycleOppSec', this.value)">
+        <span class="cfg-val" id="cfg-cycleOppSec-val"></span>
+      </div>
+    </div>
+    <div>
+      <label>Cycle — durée falls (s)</label>
+      <div class="row">
+        <input type="number" id="cfg-cycleFallsSec" min="1" step="1" oninput="onCfg('cycleFallsSec', this.value)">
+        <span class="cfg-val" id="cfg-cycleFallsSec-val"></span>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-muted" onclick="resetConfig()" style="margin-top:14px;align-self:flex-start">↺ Reset config par défaut</button>
+</div>
+
+<style>
+  .cfg-val {
+    font-size:0.7rem; color:var(--muted); align-self:center;
+    min-width:54px; text-align:right; font-variant-numeric:tabular-nums;
+  }
+</style>
+
 <!-- GLOBAL -->
 <div class="global-card">
   <h2>GLOBAL</h2>
@@ -290,6 +383,51 @@
       body: JSON.stringify({ playerId: pid, ...fields }),
     }).then(() => toast('Mis a jour'));
   }
+
+  // ─── CONFIG LIVE ─────────────────────────────────────────────────────────
+
+  const CFG_DEFAULTS = {
+    scale: 30, fallThreshold: 150, fallMinSpeed: 90, fallRecovery: 30,
+    fallTimeoutMs: 2500, milestoneStep: 100,
+    cycleDuoSec: 6, cycleOppSec: 5, cycleFallsSec: 5,
+  };
+
+  let cfgDebounce = {};
+  function onCfg(key, raw) {
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n <= 0) return;
+    el('cfg-' + key + '-val').textContent = n;
+    clearTimeout(cfgDebounce[key]);
+    cfgDebounce[key] = setTimeout(() => {
+      fetch('/api/admin/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: n }),
+      });
+    }, 250);
+  }
+
+  function resetConfig() {
+    if (!confirm('Reset config aux valeurs par defaut ?')) return;
+    fetch('/api/admin/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(CFG_DEFAULTS),
+    });
+    toast('Config reset');
+  }
+
+  function applyCfgToUI(cfg) {
+    for (const [k, v] of Object.entries(cfg)) {
+      const inp = el('cfg-' + k);
+      const lbl = el('cfg-' + k + '-val');
+      if (inp && document.activeElement !== inp) inp.value = v;  // ne pas perturber la saisie
+      if (lbl) lbl.textContent = v;
+    }
+  }
+
+  socket.on('config_sync', applyCfgToUI);
+  fetch('/api/config').then(r => r.json()).then(applyCfgToUI);
 
   // ─── Helpers ─────────────────────────────────────────────────────────────
 
