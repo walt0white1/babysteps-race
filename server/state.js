@@ -42,12 +42,13 @@ function getPlayer(playerId) {
  */
 // État de chute par joueur (machine à états)
 const fallState = {
-  playerA: { isFalling: false, peak: 0, bottom: 0, lastDropT: 0 },
-  playerB: { isFalling: false, peak: 0, bottom: 0, lastDropT: 0 },
+  playerA: { isFalling: false, peak: 0, bottom: 0, lastDropT: 0, startT: 0 },
+  playerB: { isFalling: false, peak: 0, bottom: 0, lastDropT: 0, startT: 0 },
 };
-const FALL_THRESHOLD     = 150;   // ~5m affiches : seuil pour declencher une chute
-const FALL_RECOVERY      = 30;    // 1m remonte = chute consideree finie
-const FALL_TIMEOUT_MS    = 2500;  // immobile 2.5s apres avoir touche le bas = chute finie
+const FALL_THRESHOLD  = 150;   // ~5m affiches : seuil minimum d'amplitude
+const FALL_RECOVERY   = 30;    // 1m remonte = chute consideree finie
+const FALL_TIMEOUT_MS = 2500;  // immobile 2.5s = chute finie
+const FALL_MIN_SPEED  = 90;    // unites/seconde (~3 m/s avec SCALE=30) : filtre descentes volontaires
 
 function updatePlayer(playerId, { height, name, maxHeight }) {
   const player = state[playerId];
@@ -71,6 +72,7 @@ function updatePlayer(playerId, { height, name, maxHeight }) {
         fs.peak      = prev;
         fs.bottom    = curr;
         fs.lastDropT = now;
+        fs.startT    = now;
       }
     } else {
       // En chute. On suit le point le plus bas atteint
@@ -81,11 +83,14 @@ function updatePlayer(playerId, { height, name, maxHeight }) {
       // Conditions de FIN de chute :
       // - le joueur remonte au-dessus du bottom (>= recovery)
       // - OU il est immobile près du bas depuis FALL_TIMEOUT_MS
-      const recovered  = curr - fs.bottom >= FALL_RECOVERY;
-      const stalled    = now - fs.lastDropT >= FALL_TIMEOUT_MS;
+      const recovered = curr - fs.bottom >= FALL_RECOVERY;
+      const stalled   = now - fs.lastDropT >= FALL_TIMEOUT_MS;
       if (recovered || stalled) {
         const totalDrop = fs.peak - fs.bottom;
-        if (totalDrop >= FALL_THRESHOLD) {
+        const durationS = Math.max(0.001, (fs.lastDropT - fs.startT) / 1000);
+        const speed     = totalDrop / durationS;   // unites/seconde
+        // Vraie chute = amplitude ≥ 5m ET vitesse ≥ 3 m/s
+        if (totalDrop >= FALL_THRESHOLD && speed >= FALL_MIN_SPEED) {
           player.falls += 1;
           fell = true;
           drop = totalDrop;
