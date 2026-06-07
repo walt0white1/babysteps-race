@@ -365,17 +365,17 @@
       60%      { transform: translateY(2px)  rotate(2deg); }
     }
 
-    .falls__info { display: flex; flex-direction: column; }
+    .falls__info { display: flex; flex-direction: column; gap: 3px; }
     .falls__row {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 8px;
     }
     .falls__num {
       font-family: 'Big Shoulders Display', sans-serif;
       font-weight: 900;
-      font-size: 76px;
-      line-height: 0.82;
+      font-size: 64px;
+      line-height: 0.8;
       color: #fff;
       letter-spacing: -0.04em;
       font-variant-numeric: tabular-nums;
@@ -383,19 +383,40 @@
     }
     .falls__unit {
       font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 700;
       color: var(--c);
       text-shadow: var(--shadow), 0 0 12px var(--c-glow);
     }
-    .falls__who {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: -0.005em;
-      color: var(--c);
-      text-shadow: var(--shadow), 0 0 10px var(--c-glow);
-      margin-top: 4px;
+    /* Ligne 2 : ma pp (petite) + mes chutes (secondaire) */
+    .falls__me {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 1px;
+    }
+    .falls__me-pp {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+      opacity: 0.9;
+    }
+    .falls__me-pp img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .falls__me-num {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255,255,255,0.7);
+      text-shadow: var(--shadow);
+    }
+    .falls__me-num small {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      margin-left: 3px;
     }
 
     /* =========================================================================
@@ -671,7 +692,7 @@
   </div>
 </div>
 
-<!-- ── FALLS : nombre de chutes de l'adversaire ── -->
+<!-- ── FALLS : chutes adversaire (gros) + mes chutes (petit) ── -->
 <div class="falls hidden" id="falls">
   <div class="falls__icon"></div>
   <div class="falls__info">
@@ -679,7 +700,10 @@
       <span class="falls__num" id="falls-num">0</span>
       <span class="falls__unit">chutes</span>
     </div>
-    <div class="falls__who" id="falls-who">tvabdou</div>
+    <div class="falls__me">
+      <span class="falls__me-pp"><img id="falls-me-img" alt=""></span>
+      <span class="falls__me-num"><span id="falls-me-num">0</span><small>chutes</small></span>
+    </div>
   </div>
 </div>
 
@@ -758,14 +782,16 @@
     STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null,
     needsOppPP && oppIsA   ? 'delta-pp'   : null,   // A = adversaire
     needsOppPP && oppIsA   ? 'opp-img'    : null,
-    needsOppPP && viewerIsA ? 'opp-me-img' : null   // A = moi (viewer)
+    needsOppPP && viewerIsA ? 'opp-me-img'   : null, // A = moi (viewer)
+    needsOppPP && viewerIsA ? 'falls-me-img' : null
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'vs-img-b',
     STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null,
     needsOppPP && !oppIsA   ? 'delta-pp'   : null,  // B = adversaire
     needsOppPP && !oppIsA   ? 'opp-img'    : null,
-    needsOppPP && !viewerIsA ? 'opp-me-img' : null  // B = moi (viewer)
+    needsOppPP && !viewerIsA ? 'opp-me-img'   : null, // B = moi (viewer)
+    needsOppPP && !viewerIsA ? 'falls-me-img' : null
   ]);
 
   // Set pseudonyms
@@ -855,10 +881,12 @@
       }
     }
 
-    // falls - nombre de chutes de l'adversaire
+    // falls - chutes adversaire (gros) + mes chutes (petit)
     if (STYLE === 'falls') {
       const opp = oppIsA ? a : b;
+      const me  = oppIsA ? b : a;
       setNumSmooth('falls-num', opp.falls);
+      setNumSmooth('falls-me-num', me.falls);
     }
 
     // vs — counter monte dramatiquement puis reveal du gagnant
