@@ -51,10 +51,10 @@
 
     body {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: flex-end;
       min-height: 100vh;
-      padding: 20px;
+      padding: 20px 24px;
       font-family: 'JetBrains Mono', monospace;
       zoom: 1.3;   /* taille globale */
     }
@@ -710,32 +710,33 @@
        EVENT: alerte chute + milestone (flash plein ecran)
        ========================================================================= */
     @keyframes eventPop {
-      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-      12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
-      22%  { transform: translate(-50%, -50%) scale(1); }
-      80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); }
+      0%   { opacity: 0; transform: scale(0.7) translateX(20px); }
+      12%  { opacity: 1; transform: scale(1.06) translateX(0); }
+      22%  { transform: scale(1) translateX(0); }
+      80%  { opacity: 1; transform: scale(1) translateX(0); }
+      100% { opacity: 0; transform: scale(1) translateX(10px); }
     }
-    /* Centre, comme les overlays */
+    /* Ancre en haut a droite, comme les overlays */
     .event-flash {
       position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
+      top: 20px; right: 24px;
+      transform-origin: top right;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-end;
       gap: 2px;
       pointer-events: none;
       z-index: 1000;
       animation: eventPop 3s ease forwards;
     }
     .event-flash__big {
-      font-family: 'Big Shoulders Display', sans-serif;
+      font-family: 'Montserrat', sans-serif;
       font-weight: 900;
-      font-size: 60px;
-      line-height: 0.85;
-      letter-spacing: -0.03em;
-      text-shadow: 0 4px 16px rgba(0,0,0,0.95);
+      font-size: 17px;
+      line-height: 1.1;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.95);
     }
     .event-flash__sub {
       font-family: 'Montserrat', sans-serif;
