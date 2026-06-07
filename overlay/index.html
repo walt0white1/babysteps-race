@@ -730,13 +730,18 @@
       animation: eventPop 3s ease forwards;
     }
     .event-flash__big {
+      display: block;
+      width: 100%;
       font-family: 'Montserrat', sans-serif;
       font-weight: 900;
-      font-size: 17px;
-      line-height: 1.1;
-      letter-spacing: 0.1em;
+      font-size: 58px;
+      line-height: 0.92;
       text-transform: uppercase;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.95);
+      /* etire les lettres pour remplir la largeur de la phrase du bas */
+      text-align: justify;
+      text-align-last: justify;
+      text-justify: inter-character;
+      text-shadow: 0 3px 14px rgba(0,0,0,0.95);
     }
     .event-flash__sub {
       font-family: 'Montserrat', sans-serif;
@@ -746,6 +751,7 @@
       text-transform: uppercase;
       color: #fff;
       text-shadow: 0 2px 10px rgba(0,0,0,0.95);
+      white-space: nowrap;
     }
 
     /* ========== FLASH + SHAKE ========== */
