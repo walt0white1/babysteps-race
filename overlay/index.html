@@ -780,18 +780,18 @@
   loadTwitchAvatar(TWITCH_A, [
     'duo-img-a', 'vs-img-a',
     STYLE === 'solo' && SOLO_PLAYER === 'playerA' ? 'solo-img' : null,
-    needsOppPP && oppIsA   ? 'delta-pp'   : null,   // A = adversaire
-    needsOppPP && oppIsA   ? 'opp-img'    : null,
-    needsOppPP && viewerIsA ? 'opp-me-img'   : null, // A = moi (viewer)
-    needsOppPP && viewerIsA ? 'falls-me-img' : null
+    needsOppPP && oppIsA    ? 'delta-pp'     : null, // A = adversaire (delta)
+    needsOppPP && viewerIsA ? 'opp-img'      : null, // A = moi -> GROSSE PP
+    needsOppPP && oppIsA    ? 'opp-me-img'   : null, // A = adversaire -> petite PP
+    needsOppPP && oppIsA    ? 'falls-me-img' : null  // A = adversaire -> petite PP falls
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'vs-img-b',
     STYLE === 'solo' && SOLO_PLAYER === 'playerB' ? 'solo-img' : null,
-    needsOppPP && !oppIsA   ? 'delta-pp'   : null,  // B = adversaire
-    needsOppPP && !oppIsA   ? 'opp-img'    : null,
-    needsOppPP && !viewerIsA ? 'opp-me-img'   : null, // B = moi (viewer)
-    needsOppPP && !viewerIsA ? 'falls-me-img' : null
+    needsOppPP && !oppIsA    ? 'delta-pp'     : null,
+    needsOppPP && !viewerIsA ? 'opp-img'      : null, // B = moi -> GROSSE PP
+    needsOppPP && !oppIsA    ? 'opp-me-img'   : null, // B = adversaire -> petite PP
+    needsOppPP && !oppIsA    ? 'falls-me-img' : null
   ]);
 
   // Set pseudonyms
@@ -800,9 +800,9 @@
   // Pseudo de l'adversaire dans opp/falls
   setText('opp-who',   oppName);
   setText('falls-who', oppName);
-  // Couleur dataset pour opp et falls (celle de l'adversaire)
-  document.getElementById('opp').dataset.p   = oppIsA ? 'a' : 'b';
-  document.getElementById('falls').dataset.p = oppIsA ? 'a' : 'b';
+  // Couleur dataset pour opp et falls = celle du VIEWER (mes stats en gros)
+  document.getElementById('opp').dataset.p   = viewerIsA ? 'a' : 'b';
+  document.getElementById('falls').dataset.p = viewerIsA ? 'a' : 'b';
 
   function loadTwitchAvatar(username, imgIds) {
     fetch('https://decapi.me/twitch/avatar/' + encodeURIComponent(username))
@@ -848,16 +848,16 @@
       setText('solo-falls', p.falls);
     }
 
-    // opp - altitude adversaire + badge ecart + mon altitude en dessous
+    // opp - MON altitude (gros) + badge ecart + altitude adversaire (petit)
     if (STYLE === 'opp') {
-      const opp  = oppIsA ? a : b;
-      const me   = oppIsA ? b : a;
-      const oppH = toM(opp.height);
+      const me   = viewerIsA ? a : b;
+      const opp  = viewerIsA ? b : a;
       const meH  = toM(me.height);
-      const diff = oppH - meH;   // positif = adversaire devant moi
+      const oppH = toM(opp.height);
+      const diff = meH - oppH;   // positif = je suis devant
 
-      setNumSmooth('opp-num', oppH);
-      setNumSmooth('opp-me-num', meH);
+      setNumSmooth('opp-num', meH);       // GROS = moi
+      setNumSmooth('opp-me-num', oppH);   // petit = adversaire
 
       const badge = document.getElementById('opp-badge');
       const arrow = document.getElementById('opp-arrow');
@@ -869,24 +869,24 @@
         arrow.textContent = '=';
         delta.textContent = '';
       } else if (diff > 0) {
-        // adversaire est plus haut -> je suis derriere (alerte rouge)
-        badge.classList.add('behind');
+        // je suis plus haut -> je mene (vert)
+        badge.classList.add('ahead');
         arrow.textContent = '▲';
         delta.textContent = diff + 'm';
       } else {
-        // adversaire plus bas -> je mene (vert)
-        badge.classList.add('ahead');
+        // je suis plus bas -> je suis derriere (rouge)
+        badge.classList.add('behind');
         arrow.textContent = '▼';
         delta.textContent = Math.abs(diff) + 'm';
       }
     }
 
-    // falls - chutes adversaire (gros) + mes chutes (petit)
+    // falls - MES chutes (gros) + chutes adversaire (petit)
     if (STYLE === 'falls') {
-      const opp = oppIsA ? a : b;
-      const me  = oppIsA ? b : a;
-      setNumSmooth('falls-num', opp.falls);
-      setNumSmooth('falls-me-num', me.falls);
+      const me  = viewerIsA ? a : b;
+      const opp = viewerIsA ? b : a;
+      setNumSmooth('falls-num', me.falls);
+      setNumSmooth('falls-me-num', opp.falls);
     }
 
     // vs — counter monte dramatiquement puis reveal du gagnant
