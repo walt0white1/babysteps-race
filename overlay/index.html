@@ -716,12 +716,12 @@
       80%  { opacity: 1; transform: scale(1); }
       100% { opacity: 0; transform: scale(1); }
     }
-    /* Dans le meme flux que les overlays (flex child de body) -> meme position */
+    /* Horizontal (icone gauche + infos droite), dans le flux = meme position que les overlays */
     .event-flash {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      gap: 2px;
+      gap: 14px;
       transform-origin: top right;
       pointer-events: none;
       animation: eventPop 3s ease forwards;
@@ -730,7 +730,6 @@
     .event-flash__icon {
       width: 68px; height: 68px;
       flex-shrink: 0;
-      margin-bottom: 2px;
       -webkit-mask: url('fezfgzeg.png') center/contain no-repeat;
               mask: url('fezfgzeg.png') center/contain no-repeat;
       animation: fallDrop 0.9s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -744,7 +743,7 @@
     .event-flash__col {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
     }
     /* Le gros chiffre = ampleur de la chute (le hero) */
     .event-flash__big {
@@ -766,7 +765,7 @@
       text-shadow: 0 2px 10px rgba(0,0,0,0.95);
       white-space: nowrap;
       margin-top: 2px;
-      text-align: center;
+      text-align: left;
     }
 
     /* ========== FLASH + SHAKE ========== */
