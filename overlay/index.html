@@ -1216,12 +1216,14 @@
   function checkMilestone(meH) {
     const cap = Math.floor(meH / MILESTONE_STEP) * MILESTONE_STEP;
     if (lastMilestone === null) {
-      lastMilestone = cap;     // init silencieux au 1er state (evite flash au chargement si deja haut)
+      lastMilestone = cap;     // init silencieux au 1er state
       return;
     }
     if (cap > lastMilestone) {
       showMilestone(cap);
       lastMilestone = cap;
+    } else if (cap < lastMilestone) {
+      lastMilestone = cap;     // reset / grosse chute -> re-arme les caps
     }
   }
   function showMilestone(cap) {
