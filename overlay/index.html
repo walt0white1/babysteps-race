@@ -607,6 +607,145 @@
       text-shadow: var(--shadow);
     }
 
+    /* =========================================================================
+       STYLE: STAT — peak / speed (MES stats en gros, adversaire en petit)
+       ========================================================================= */
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      --c: var(--a);
+      --c-glow: var(--a-glow);
+    }
+    .stat[data-p="b"] { --c: var(--b); --c-glow: var(--b-glow); }
+
+    .stat__icon {
+      width: 70px; height: 70px;
+      background-color: var(--c);
+      -webkit-mask-position: center; mask-position: center;
+      -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+      -webkit-mask-size: contain; mask-size: contain;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9)) drop-shadow(0 0 14px var(--c-glow));
+      flex-shrink: 0;
+    }
+    /* Icone record = chevron empile (sommet) */
+    .stat__icon--peak {
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 8 L82 44 H62 V60 H38 V44 H18 Z' fill='black'/%3E%3Crect x='38' y='70' width='24' height='10' rx='3' fill='black'/%3E%3C/svg%3E");
+              mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 8 L82 44 H62 V60 H38 V44 H18 Z' fill='black'/%3E%3Crect x='38' y='70' width='24' height='10' rx='3' fill='black'/%3E%3C/svg%3E");
+    }
+    /* Icone vitesse = double chevron up */
+    .stat__icon--speed {
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 14 L84 50 H64 L50 36 L36 50 H16 Z' fill='black'/%3E%3Cpath d='M50 50 L84 86 H64 L50 72 L36 86 H16 Z' fill='black'/%3E%3C/svg%3E");
+              mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 14 L84 50 H64 L50 36 L36 50 H16 Z' fill='black'/%3E%3Cpath d='M50 50 L84 86 H64 L50 72 L36 86 H16 Z' fill='black'/%3E%3C/svg%3E");
+      animation: speedPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes speedPulse {
+      0%, 100% { transform: translateY(0); opacity: 0.85; }
+      50%      { transform: translateY(-3px); opacity: 1; }
+    }
+
+    .stat__info { display: flex; flex-direction: column; gap: 3px; }
+    .stat__label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 8px var(--c-glow);
+    }
+    .stat__row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .stat__num {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 64px;
+      line-height: 0.8;
+      color: #fff;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: var(--shadow);
+    }
+    .stat__unit {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--c);
+      text-shadow: var(--shadow), 0 0 12px var(--c-glow);
+    }
+    .stat__me {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 1px;
+    }
+    .stat__me-pp {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+      opacity: 0.9;
+    }
+    .stat__me-pp img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .stat__me-num {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255,255,255,0.7);
+      text-shadow: var(--shadow);
+    }
+    .stat__me-num small {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      margin-left: 2px;
+    }
+
+    /* =========================================================================
+       EVENT: alerte chute + milestone (flash plein ecran)
+       ========================================================================= */
+    @keyframes eventPop {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+      12%  { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+      22%  { transform: translate(-50%, -50%) scale(1); }
+      80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); }
+    }
+    .event-flash {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 1000;
+      animation: eventPop 3s ease forwards;
+    }
+    .event-flash__big {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 88px;
+      line-height: 0.85;
+      letter-spacing: -0.03em;
+      text-shadow: 0 4px 16px rgba(0,0,0,0.95);
+    }
+    .event-flash__sub {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.95);
+    }
+
     /* ========== FLASH + SHAKE ========== */
     @keyframes leadEnter {
       0%   { opacity: 0; transform: translateY(-6px); }
@@ -708,6 +847,38 @@
   </div>
 </div>
 
+<!-- ── PEAK : mon record (gros) + record adversaire (petit) ── -->
+<div class="stat hidden" id="peak">
+  <div class="stat__icon stat__icon--peak"></div>
+  <div class="stat__info">
+    <div class="stat__label">record</div>
+    <div class="stat__row">
+      <span class="stat__num" id="peak-num">0</span>
+      <span class="stat__unit">m</span>
+    </div>
+    <div class="stat__me">
+      <span class="stat__me-pp"><img id="peak-me-img" alt=""></span>
+      <span class="stat__me-num"><span id="peak-me-num">0</span><small>m</small></span>
+    </div>
+  </div>
+</div>
+
+<!-- ── SPEED : ma vitesse de montee ── -->
+<div class="stat hidden" id="speed">
+  <div class="stat__icon stat__icon--speed"></div>
+  <div class="stat__info">
+    <div class="stat__label">vitesse</div>
+    <div class="stat__row">
+      <span class="stat__num" id="speed-num">0</span>
+      <span class="stat__unit">m/min</span>
+    </div>
+    <div class="stat__me">
+      <span class="stat__me-pp"><img id="speed-me-img" alt=""></span>
+      <span class="stat__me-num"><span id="speed-me-num">0</span><small>m/min</small></span>
+    </div>
+  </div>
+</div>
+
 <!-- ── DELTA (perspective overlay) ── -->
 <div class="delta hidden tied" id="delta">
   <div class="delta__pp"><img id="delta-pp" alt=""></div>
@@ -753,7 +924,7 @@
   // =========================================================================
   // SHOW THE RIGHT LAYOUT
   // =========================================================================
-  const ALL_OVERLAYS = ['duo','solo','vs','delta','opp','falls'];
+  const ALL_OVERLAYS = ['duo','solo','vs','delta','opp','falls','peak','speed'];
   if (CYCLE) {
     ALL_OVERLAYS.forEach(id => document.getElementById(id).classList.add('hidden'));
   } else {
@@ -776,7 +947,7 @@
   const oppIsA     = !viewerIsA;
   const oppName    = oppIsA ? TWITCH_A : TWITCH_B;
   // Pour opp/falls/delta, le PP affiche c'est celui de l'adversaire
-  const needsOppPP = STYLE === 'delta' || STYLE === 'opp' || STYLE === 'falls' || CYCLE;
+  const needsOppPP = ['delta','opp','falls','peak','speed'].includes(STYLE) || CYCLE;
 
   loadTwitchAvatar(TWITCH_A, [
     'duo-img-a', 'vs-img-a',
@@ -784,7 +955,9 @@
     needsOppPP && oppIsA    ? 'delta-pp'     : null, // A = adversaire (delta)
     needsOppPP && viewerIsA ? 'opp-img'      : null, // A = moi -> GROSSE PP
     needsOppPP && oppIsA    ? 'opp-me-img'   : null, // A = adversaire -> petite PP
-    needsOppPP && oppIsA    ? 'falls-me-img' : null  // A = adversaire -> petite PP falls
+    needsOppPP && oppIsA    ? 'falls-me-img' : null,
+    needsOppPP && oppIsA    ? 'peak-me-img'  : null,
+    needsOppPP && oppIsA    ? 'speed-me-img' : null
   ]);
   loadTwitchAvatar(TWITCH_B, [
     'duo-img-b', 'vs-img-b',
@@ -792,7 +965,9 @@
     needsOppPP && !oppIsA    ? 'delta-pp'     : null,
     needsOppPP && !viewerIsA ? 'opp-img'      : null, // B = moi -> GROSSE PP
     needsOppPP && !oppIsA    ? 'opp-me-img'   : null, // B = adversaire -> petite PP
-    needsOppPP && !oppIsA    ? 'falls-me-img' : null
+    needsOppPP && !oppIsA    ? 'falls-me-img' : null,
+    needsOppPP && !oppIsA    ? 'peak-me-img'  : null,
+    needsOppPP && !oppIsA    ? 'speed-me-img' : null
   ]);
 
   // Set pseudonyms
@@ -801,9 +976,12 @@
   // Pseudo de l'adversaire dans opp/falls
   setText('opp-who',   oppName);
   setText('falls-who', oppName);
-  // Couleur dataset pour opp et falls = celle du VIEWER (mes stats en gros)
-  document.getElementById('opp').dataset.p   = viewerIsA ? 'a' : 'b';
-  document.getElementById('falls').dataset.p = viewerIsA ? 'a' : 'b';
+  // Couleur dataset = celle du VIEWER (mes stats en gros)
+  const myColorP = viewerIsA ? 'a' : 'b';
+  document.getElementById('opp').dataset.p   = myColorP;
+  document.getElementById('falls').dataset.p = myColorP;
+  document.getElementById('peak').dataset.p  = myColorP;
+  document.getElementById('speed').dataset.p = myColorP;
 
   function loadTwitchAvatar(username, imgIds) {
     fetch('https://decapi.me/twitch/avatar/' + encodeURIComponent(username))
@@ -826,7 +1004,7 @@
   let lastState = null;
   socket.on('state_sync', (s) => { lastState = s; applyState(s); });
   socket.on('lead_change', ({ leader, state }) => { lastState = state; applyState(state); flashLead(leader, state); });
-  socket.on('fall', ({ playerId }) => { shakeFall(playerId); });
+  socket.on('fall', ({ playerId }) => { shakeFall(playerId); showFallAlert(playerId); });
 
   // Style effectif (rotation ou statique)
   function activeStyle() { return CYCLE ? (currentStyle || 'duo') : STYLE; }
@@ -836,6 +1014,13 @@
     const a = s.playerA, b = s.playerB;
     const aH = toM(a.height);
     const bH = toM(b.height);
+
+    // ── Tracking continu (toujours, pour vitesse + milestone) ──
+    const meH  = viewerIsA ? aH : bH;
+    const oppH = viewerIsA ? bH : aH;
+    recordSample('me', meH);
+    recordSample('opp', oppH);
+    checkMilestone(meH);
 
     // duo
     setNumSmooth('duo-num-a', aH);
@@ -888,6 +1073,20 @@
       const opp = viewerIsA ? b : a;
       setNumSmooth('falls-num', me.falls);
       setNumSmooth('falls-me-num', opp.falls);
+    }
+
+    // peak - MON record (gros) + record adversaire (petit)
+    if (STYLE === 'peak') {
+      const me  = viewerIsA ? a : b;
+      const opp = viewerIsA ? b : a;
+      setNumSmooth('peak-num', toM(me.maxHeight));
+      setNumSmooth('peak-me-num', toM(opp.maxHeight));
+    }
+
+    // speed - MA vitesse (gros) + vitesse adversaire (petit)
+    if (STYLE === 'speed') {
+      setNumSmooth('speed-num', computeSpeed('me'));
+      setNumSmooth('speed-me-num', computeSpeed('opp'));
     }
 
     // vs — counter monte dramatiquement puis reveal du gagnant
@@ -961,11 +1160,74 @@
 
   function setText(id, t) { const n = document.getElementById(id); if (n) n.textContent = t; }
 
+  // ── Vitesse de montee (m/min sur fenetre glissante ~12s) ──
+  const samples = { me: [], opp: [] };
+  function recordSample(who, h) {
+    const now = performance.now();
+    const arr = samples[who];
+    arr.push({ t: now, h });
+    // garde seulement les 12 dernieres secondes
+    while (arr.length > 1 && now - arr[0].t > 12000) arr.shift();
+  }
+  function computeSpeed(who) {
+    const arr = samples[who];
+    if (arr.length < 2) return 0;
+    const first = arr[0], last = arr[arr.length - 1];
+    const dtMin = (last.t - first.t) / 60000;
+    if (dtMin <= 0) return 0;
+    const rate = (last.h - first.h) / dtMin;
+    return Math.max(0, Math.round(rate));  // pas de vitesse negative
+  }
+
+  // ── Milestone : flash quand JE passe un cap rond (100, 200, ...) ──
+  let lastMilestone = 0;
+  const MILESTONE_STEP = 100;
+  function checkMilestone(meH) {
+    const cap = Math.floor(meH / MILESTONE_STEP) * MILESTONE_STEP;
+    if (cap > lastMilestone && cap > 0) {
+      // ne pas flasher au tout premier chargement si deja haut
+      if (lastMilestone !== 0) showMilestone(cap);
+      lastMilestone = cap;
+    } else if (lastMilestone === 0) {
+      lastMilestone = cap;  // init silencieux
+    }
+  }
+  function showMilestone(cap) {
+    const color = viewerIsA ? '#22d3ee' : '#fbbf24';
+    const glow  = viewerIsA ? 'rgba(34,211,238,0.6)' : 'rgba(251,191,36,0.6)';
+    const d = document.createElement('div');
+    d.className = 'event-flash';
+    d.innerHTML =
+      '<div class="event-flash__big" style="color:' + color +
+        ';text-shadow:0 0 30px ' + glow + ',0 4px 16px rgba(0,0,0,0.95)">' + cap + 'm</div>' +
+      '<div class="event-flash__sub">cap atteint</div>';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 3000);
+  }
+
+  // ── Alerte chute : flash quand quelqu'un tombe ──
+  function showFallAlert(playerId) {
+    const name  = playerId === 'playerA' ? TWITCH_A : TWITCH_B;
+    const isMe  = (playerId === 'playerA') === viewerIsA;
+    const color = playerId === 'playerA' ? '#22d3ee' : '#fbbf24';
+    const glow  = playerId === 'playerA' ? 'rgba(34,211,238,0.6)' : 'rgba(251,191,36,0.6)';
+    const d = document.createElement('div');
+    d.className = 'event-flash';
+    d.innerHTML =
+      '<div class="event-flash__big" style="color:' + color +
+        ';text-shadow:0 0 30px ' + glow + ',0 4px 16px rgba(0,0,0,0.95)">CHUTE</div>' +
+      '<div class="event-flash__sub">' + name + (isMe ? ' est tombé' : ' est tombé') + '</div>';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 3000);
+  }
+
   // ── ROTATION : cycle des overlays automatiquement ──
   let currentStyle = null;
   const cycleSequence = [
     { id: 'duo',   style: 'duo',   duration: 6000 },
     { id: 'opp',   style: 'opp',   duration: 5000 },
+    { id: 'peak',  style: 'peak',  duration: 5000 },
+    { id: 'speed', style: 'speed', duration: 5000 },
     { id: 'falls', style: 'falls', duration: 5000 },
   ];
   let cycleIdx = 0;
